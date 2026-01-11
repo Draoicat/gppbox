@@ -157,7 +157,7 @@ int main()
 			ImGui::ColorEdit4("bloomMul", &bloomMul.x);
 			ImGui::ColorEdit4("bloomMul2", &bloomMul.x);
 		}
-		g.im();
+		g.imGui();
 
         g.draw(window);
 

@@ -8,6 +8,7 @@
 
 #include "HotReloadShader.hpp"
 
+Game* Game::instance = 0;
 static int cols = C::RES_X / C::GRID_SIZE;
 static int lastLine = C::RES_Y / C::GRID_SIZE - 1;
 
@@ -40,6 +41,8 @@ Game::Game(sf::RenderWindow * win) {
 	walls.push_back(Vector2i(cols >>2, lastLine - 4));
 	walls.push_back(Vector2i((cols >> 2) + 1, lastLine - 4));
 	cacheWalls();
+
+	entities.push_back(new Entity);
 }
 
 void Game::cacheWalls()
@@ -69,21 +72,21 @@ void Game::processInput(sf::Event ev) {
 	}
 }
 
-
 static double g_time = 0.0;
 static double g_tickTimer = 0.0;
 
-
 void Game::pollInput(double dt) {
-
 	float lateralSpeed = 8.0;
 	float maxSpeed = 40.0;
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q)) {
 
+	Entity* player = entities[0];
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q)) {
+		player->dx -= 0.5f;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
-
+		player->dx += 0.5f;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
@@ -121,11 +124,16 @@ void Game::update(double dt) {
 	pollInput(dt);
 
 	g_time += dt;
+
+	for (Entity* e : entities)
+		e->update(dt);
+
 	if (bgShader) bgShader->update(dt);
 
 	beforeParts.update(dt);
 	afterParts.update(dt);
 }
+
 
  void Game::draw(sf::RenderWindow & win) {
 	if (closing) return;
@@ -146,7 +154,9 @@ void Game::update(double dt) {
 
 	for (sf::RectangleShape& r : rects) 
 		win.draw(r);
-	
+
+	for (Entity* e : entities)
+		e->draw(win);
 
 	afterParts.draw(win);
 }
@@ -158,15 +168,38 @@ void Game::onSpacePressed() {
 
 bool Game::isWall(int cx, int cy)
 {
-	for (Vector2i & w : walls) {
+	for (Vector2i& w : walls) {
 		if (w.x == cx && w.y == cy)
 			return true;
 	}
 	return false;
 }
 
-void Game::im()
+bool Game::hasCollisions(float cx, float cy)
 {
+	//if (cx < 1.5f) return true;
 
+	//auto wallRightX = (C::RES_X / C::GRID_SIZE) - 1;
+	//if (cx >= wallRightX) return true;
+
+	return isWall((int) cx, (int) cy);
 }
 
+void Game::imGui()
+{
+	if (ImGui::TreeNodeEx("Walls", 0))
+	{
+		for (Vector2i& wall : walls)
+		{
+			ImGui::Value("x", wall.x);
+			ImGui::Value("y", wall.y);
+		}
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNodeEx("Entities", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		for (Entity* e : entities) e->imGui();
+		ImGui::TreePop();
+	}
+}

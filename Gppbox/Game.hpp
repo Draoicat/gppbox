@@ -8,14 +8,17 @@
 
 #include "sys.hpp"
 
+#include "Entity.hpp"
+
 #include "Particle.hpp"
 #include "ParticleMan.hpp"
 
-using namespace sf;
 
 class HotReloadShader;
 class Game {
 public:
+	static Game* instance;
+
 	sf::RenderWindow*				win = nullptr;
 
 	sf::RectangleShape				bg;
@@ -27,6 +30,8 @@ public:
 	
 	std::vector<sf::Vector2i>		walls;
 	std::vector<sf::RectangleShape> wallSprites;
+
+	std::vector<Entity*> entities;
 
 	ParticleMan beforeParts;
 	ParticleMan afterParts;
@@ -41,9 +46,10 @@ public:
 	void onSpacePressed();
 
 	void update(double dt);
+	bool hasCollisions(float cx, float cy);
 
 	void draw(sf::RenderWindow& win);
 
 	bool isWall(int cx, int cy);
-	void im();
+	void imGui();
 };
