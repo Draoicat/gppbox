@@ -31,7 +31,7 @@ public:
 	std::vector<sf::Vector2i>		walls;
 	std::vector<sf::RectangleShape> wallSprites;
 
-	std::vector<Entity*> entities;
+	std::vector<Entity*>			entities;
 
 	ParticleMan beforeParts;
 	ParticleMan afterParts;
@@ -46,7 +46,7 @@ public:
 	void onSpacePressed();
 
 	void update(double dt);
-	bool hasCollisions(float cx, float cy);
+	bool hasCollisions(float posX, float posY);
 
 	void draw(sf::RenderWindow& win);
 

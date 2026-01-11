@@ -28,37 +28,42 @@ void Entity::update(double deltaTime)
 	//right
 	while (rx > 1.0f)
 	{
-		//if (!Game::instance->hasCollisions(cx+rx, cy+ry)) 
+		if (!Game::instance->hasCollisions(cx+rx, cy+ry)) 
 		{
 			--rx;
 			++cx;
 		}
-		//else
-		//{
-		//	dx = 0; //stop movement
-		//	rx = 0.7f; //cap
-		//}
+		else
+		{
+			dx = 0;
+			rx = 0.7f;
+		}
 	}
 
 	//left
 	while (rx < 0.0f)
 	{
-		//if (!Game::instance->hasCollisions(cx-1, cy)) 
+		if (!Game::instance->hasCollisions(cx+rx, cy+ry)) 
 		{
-			
 			++rx;
 			--cx;
 		}
-		//else
-		//{
-		//	dx = 0; //stop movement
-		//	rx = 0.3f; //cap
-		//}
+		else
+		{
+			dx = 0;
+			rx = 0.3f; 
+		}
 	}
 
 	//up
 	while (ry > 1.0f)
 	{
+		if (!Game::instance->hasCollisions(cx+rx, cy+ry)) 
+		{
+			dy = 0;
+			ry = 0.7f; 
+		}
+		else 
 		{
 			--ry;
 			++cy;
@@ -68,6 +73,12 @@ void Entity::update(double deltaTime)
 	//down
 	while (ry < 0.0f)
 	{
+		if (!Game::instance->hasCollisions(cx+rx, cy+ry)) 
+		{
+			dy = 0;
+			ry = 0.3f;
+		}
+		else
 		{
 			++ry;
 			--cy;

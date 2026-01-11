@@ -1,7 +1,7 @@
-
 #include <imgui.h>
 #include <array>
 #include <vector>
+#include <iostream>
 
 #include "C.hpp"
 #include "Game.hpp"
@@ -26,9 +26,9 @@ Game::Game(sf::RenderWindow * win) {
 	bgShader = new HotReloadShader("res/bg.vert", "res/bg.frag");
 	
 	for (int i = 0; i < C::RES_X / C::GRID_SIZE; ++i) 
-		walls.push_back( Vector2i(i, lastLine) );
+		walls.push_back(Vector2i(i, lastLine) );
 
-	walls.push_back(Vector2i(0, lastLine-1));
+	/*walls.push_back(Vector2i(0, lastLine-1));
 	walls.push_back(Vector2i(0, lastLine-2));
 	walls.push_back(Vector2i(0, lastLine-3));
 
@@ -39,7 +39,7 @@ Game::Game(sf::RenderWindow * win) {
 	walls.push_back(Vector2i(cols >>2, lastLine - 2));
 	walls.push_back(Vector2i(cols >>2, lastLine - 3));
 	walls.push_back(Vector2i(cols >>2, lastLine - 4));
-	walls.push_back(Vector2i((cols >> 2) + 1, lastLine - 4));
+	walls.push_back(Vector2i((cols >> 2) + 1, lastLine - 4));*/
 	cacheWalls();
 
 	entities.push_back(new Entity);
@@ -165,31 +165,32 @@ void Game::onSpacePressed() {
 	
 }
 
-
 bool Game::isWall(int cx, int cy)
 {
-	for (Vector2i& w : walls) {
+	for (Vector2i& w : walls) 
+	{
+		std::cout << "Evaluating : " << w.x << "," << w.y << '\n';
 		if (w.x == cx && w.y == cy)
 			return true;
 	}
 	return false;
 }
 
-bool Game::hasCollisions(float cx, float cy)
+bool Game::hasCollisions(const float posX, const float posY)
 {
-	//if (cx < 1.5f) return true;
+	if (posX < 1.5f) return true;
 
-	//auto wallRightX = (C::RES_X / C::GRID_SIZE) - 1;
-	//if (cx >= wallRightX) return true;
+	int wallRightX = (C::RES_X / C::GRID_SIZE) - 1;
+	if (posX >= wallRightX) return true;
 
-	return isWall((int) cx, (int) cy);
+	return isWall(static_cast<int>(posX), static_cast<int>(posY));
 }
 
 void Game::imGui()
 {
 	if (ImGui::TreeNodeEx("Walls", 0))
 	{
-		for (Vector2i& wall : walls)
+		for (Vector2i const& wall : walls)
 		{
 			ImGui::Value("x", wall.x);
 			ImGui::Value("y", wall.y);
