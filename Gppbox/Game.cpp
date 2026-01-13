@@ -84,11 +84,11 @@ void Game::pollInput(double dt) {
 	Entity* player = entities[0];
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q)) {
-		player->dx -= 10.0f;
+		player->dx -= 3.0f;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
-		player->dx += 10.0f;
+		player->dx += 3.0f;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {

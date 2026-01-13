@@ -21,8 +21,12 @@ public:
 	float dy{ 0.0f };
 
 	// Gravity
-	const float GRAVITY_RATE{ 0.5f };
+	const float GRAVITY_RATE{ 80.0f };
 	bool has_gravity{ true };
+
+	// Friction
+	float frx = 0.70f;
+	float fry = 1.0f;
 
 	Entity();
 	Entity(sf::Shape* shape);
