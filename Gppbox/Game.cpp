@@ -13,6 +13,8 @@ static int cols = C::RES_X / C::GRID_SIZE;
 static int lastLine = C::RES_Y / C::GRID_SIZE - 1;
 
 Game::Game(sf::RenderWindow * win) {
+	instance = this;
+
 	this->win = win;
 	bg = sf::RectangleShape(Vector2f((float)win->getSize().x, (float)win->getSize().y));
 
@@ -28,7 +30,7 @@ Game::Game(sf::RenderWindow * win) {
 	for (int i = 0; i < C::RES_X / C::GRID_SIZE; ++i) 
 		walls.push_back(Vector2i(i, lastLine) );
 
-	/*walls.push_back(Vector2i(0, lastLine-1));
+	walls.push_back(Vector2i(0, lastLine-1));
 	walls.push_back(Vector2i(0, lastLine-2));
 	walls.push_back(Vector2i(0, lastLine-3));
 
@@ -39,7 +41,7 @@ Game::Game(sf::RenderWindow * win) {
 	walls.push_back(Vector2i(cols >>2, lastLine - 2));
 	walls.push_back(Vector2i(cols >>2, lastLine - 3));
 	walls.push_back(Vector2i(cols >>2, lastLine - 4));
-	walls.push_back(Vector2i((cols >> 2) + 1, lastLine - 4));*/
+	walls.push_back(Vector2i((cols >> 2) + 1, lastLine - 4));
 	cacheWalls();
 
 	entities.push_back(new Entity);
@@ -82,11 +84,11 @@ void Game::pollInput(double dt) {
 	Entity* player = entities[0];
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q)) {
-		player->dx -= 0.5f;
+		player->dx -= 10.0f;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
-		player->dx += 0.5f;
+		player->dx += 10.0f;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
@@ -134,7 +136,6 @@ void Game::update(double dt) {
 	afterParts.update(dt);
 }
 
-
  void Game::draw(sf::RenderWindow & win) {
 	if (closing) return;
 
@@ -169,7 +170,6 @@ bool Game::isWall(int cx, int cy)
 {
 	for (Vector2i& w : walls) 
 	{
-		std::cout << "Evaluating : " << w.x << "," << w.y << '\n';
 		if (w.x == cx && w.y == cy)
 			return true;
 	}

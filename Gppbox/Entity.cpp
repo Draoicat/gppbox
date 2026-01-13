@@ -21,9 +21,13 @@ void Entity::update(double deltaTime)
 	//apply gravity
 	if (has_gravity) dy += GRAVITY_RATE;
 
+	//friction applied to movement
+	dx *= 0.96;
+
 	//movement and collisions
 	rx += dx * deltaTime;
 	ry += dy * deltaTime;
+
 
 	//right
 	while (rx > 1.0f)
@@ -55,38 +59,8 @@ void Entity::update(double deltaTime)
 		}
 	}
 
-	//up
-	while (ry > 1.0f)
-	{
-		if (!Game::instance->hasCollisions(cx+rx, cy+ry)) 
-		{
-			dy = 0;
-			ry = 0.7f; 
-		}
-		else 
-		{
-			--ry;
-			++cy;
-		}
-	}
 
-	//down
-	while (ry < 0.0f)
-	{
-		if (!Game::instance->hasCollisions(cx+rx, cy+ry)) 
-		{
-			dy = 0;
-			ry = 0.3f;
-		}
-		else
-		{
-			++ry;
-			--cy;
-		}
-	}
 
-	//friction applied to movement
-	dx *= 0.96;
 
 	//jumping
 

@@ -21,8 +21,8 @@ public:
 	float dy{ 0.0f };
 
 	// Gravity
-	const float GRAVITY_RATE{ 0.05f };
-	bool has_gravity{ false };
+	const float GRAVITY_RATE{ 0.5f };
+	bool has_gravity{ true };
 
 	Entity();
 	Entity(sf::Shape* shape);
