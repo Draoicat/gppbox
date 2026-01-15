@@ -28,6 +28,16 @@ public:
 	float frx = 0.65f;
 	float fry = 1.0f;
 
+	// Actions
+	void jump();
+	bool is_jumping{ false };
+
+	// Collisions
+	bool checkLeftCollision();
+	bool checkRightCollision();
+	bool checkBottomCollision();
+	bool checkTopCollision();
+
 	Entity();
 	Entity(sf::Shape* shape);
 	

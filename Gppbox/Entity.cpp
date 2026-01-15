@@ -17,6 +17,32 @@ Entity::Entity(sf::Shape* sprite) : sprite{ sprite }
 	sprite->setOrigin({ C::GRID_SIZE * 0.5f, C::GRID_SIZE * 2 });
 }
 
+void Entity::jump()
+{
+	if (!checkBottomCollision() || is_jumping) return;
+	is_jumping = true;
+}
+
+bool Entity::checkLeftCollision()
+{
+	return Game::instance->hasCollisions(cx - 1, cy) && rx <= 0.3f;
+}
+
+bool Entity::checkRightCollision()
+{
+	return Game::instance->hasCollisions(cx + 1, cy) && rx >= 0.7f;
+}
+
+bool Entity::checkBottomCollision()
+{
+	return Game::instance->hasCollisions(cx, cy + 1);
+}
+
+bool Entity::checkTopCollision()
+{
+	return Game::instance->hasCollisions(cx, cy - 1);
+}
+
 void Entity::update(double deltaTime)
 {
 	double rate = 1.0 / deltaTime;
@@ -26,29 +52,34 @@ void Entity::update(double deltaTime)
 
 	dx = dx * pow(frx, dfr);
 	dy = dy * pow(fry, dfr);
-
+	
 	rx += dx * deltaTime;
 	ry += dy * deltaTime;
 
 	// collisions
-	if (Game::instance->hasCollisions(cx + 1, cy) && rx >= 0.7f)
+	if (checkRightCollision())
 	{
-		dx = 0;
+		dx = 0.0f;
 		rx = 0.7f;
 	}
-	else if (Game::instance->hasCollisions(cx - 1, cy) && rx <= 0.3f)
+	else if (checkLeftCollision())
 	{
-		dx = 0;
+		dx = 0.0f;
 		rx = 0.3f;
 	}
 
-	if (Game::instance->hasCollisions(cx, cy+1)) 
+	if (checkBottomCollision() && !is_jumping) 
 	{
-		dy = 0;
 		ry = 0.98;
+		dy = 0.0f;
+	}
+	else if (checkTopCollision()) 
+	{
+		ry = 0.02;
+		dy = 0.0f;
 	}
 	
-	// movement
+	// update position
 	if (rx > 1.0f)
 	{
 		--rx;
@@ -64,6 +95,11 @@ void Entity::update(double deltaTime)
 	{
 		--ry;
 		++cy;
+	}
+	else if (ry < 0.0f)
+	{
+		++ry;
+		--cy;
 	}
 
 	syncPosition();
@@ -111,6 +147,11 @@ void Entity::imGui()
 
 	ImGui::Value("rx", rx);
 	ImGui::Value("ry", ry);
+
+	ImGui::Value("dx", dx);
+	ImGui::Value("dy", dy);
+
+	ImGui::Value("Is Jumping", is_jumping);
 
 	if (ImGui::Button("Set Grid Position (5, 5)")) setGridCoord(5, 5);
 

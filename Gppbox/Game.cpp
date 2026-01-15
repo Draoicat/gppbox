@@ -72,7 +72,7 @@ void Game::processInput(sf::Event ev) {
 			cacheWalls();
 		}
 	}
-}
+} 
 
 static double g_time = 0.0;
 static double g_tickTimer = 0.0;
@@ -123,7 +123,6 @@ int blendModeIndex(sf::BlendMode bm) {
 };
 
 void Game::update(double dt) {
-	pollInput(dt);
 
 	g_time += dt;
 
@@ -134,6 +133,8 @@ void Game::update(double dt) {
 
 	beforeParts.update(dt);
 	afterParts.update(dt);
+	
+	pollInput(dt);
 }
 
  void Game::draw(sf::RenderWindow & win) {
@@ -163,7 +164,7 @@ void Game::update(double dt) {
 }
 
 void Game::onSpacePressed() {
-	
+	entities[0]->jump();
 }
 
 bool Game::isWall(int cx, int cy)
