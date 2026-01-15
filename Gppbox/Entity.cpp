@@ -31,24 +31,23 @@ void Entity::update(double deltaTime)
 	ry += dy * deltaTime;
 
 	// collisions
-	if (Game::instance->hasCollisions(cx + rx, cy + ry) && rx >= 0.7f)
+	if (Game::instance->hasCollisions(cx + 1, cy) && rx >= 0.7f)
 	{
 		dx = 0;
 		rx = 0.7f;
 	}
-	else if (Game::instance->hasCollisions(cx + rx, cy + ry) && rx <= 0.3f)
+	else if (Game::instance->hasCollisions(cx - 1, cy) && rx <= 0.3f)
 	{
 		dx = 0;
 		rx = 0.3f;
 	}
 
-	if (Game::instance->hasCollisions(cx+rx, cy+ry)) 
+	if (Game::instance->hasCollisions(cx, cy+1)) 
 	{
 		dy = 0;
-		ry = 0.99f;
-		has_gravity = false;
+		ry = 0.98;
 	}
-
+	
 	// movement
 	if (rx > 1.0f)
 	{

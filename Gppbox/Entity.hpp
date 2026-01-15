@@ -25,7 +25,7 @@ public:
 	bool has_gravity{ true };
 
 	// Friction
-	float frx = 0.70f;
+	float frx = 0.65f;
 	float fry = 1.0f;
 
 	Entity();
