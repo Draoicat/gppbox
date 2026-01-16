@@ -21,16 +21,15 @@ public:
 	float dy{ 0.0f };
 
 	// Gravity
-	const float GRAVITY_RATE{ 80.0f };
+	float const GRAVITY_RATE{ 100.0f };
 	bool has_gravity{ true };
 
-	// Friction
-	float frx = 0.65f;
-	float fry = 1.0f;
-
 	// Actions
+	float const SPEED{ 10.0f };
+
 	void jump();
 	bool is_jumping{ false };
+	const float JUMP_FORCE{ 40.0f };
 
 	// Collisions
 	bool checkLeftCollision();

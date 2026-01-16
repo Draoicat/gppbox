@@ -20,6 +20,7 @@ Entity::Entity(sf::Shape* sprite) : sprite{ sprite }
 void Entity::jump()
 {
 	if (!checkBottomCollision() || is_jumping) return;
+	dy -= JUMP_FORCE;
 	is_jumping = true;
 }
 
@@ -45,16 +46,14 @@ bool Entity::checkTopCollision()
 
 void Entity::update(double deltaTime)
 {
-	double rate = 1.0 / deltaTime;
-	double dfr = 60.0f / rate;
-
 	if (has_gravity) dy += GRAVITY_RATE * deltaTime;
-
-	dx = dx * pow(frx, dfr);
-	dy = dy * pow(fry, dfr);
-	
+	dy = clamp(dy, -1000.0f, 150.0f);
+	//dx *= 1 - clamp((float) deltaTime * 0.96f, 0.0f, 1.0f);
+	dx *= 0.70f;
 	rx += dx * deltaTime;
 	ry += dy * deltaTime;
+
+	if (is_jumping && dy > 0) is_jumping = false;
 
 	// collisions
 	if (checkRightCollision())
