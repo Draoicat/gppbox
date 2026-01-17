@@ -29,19 +29,6 @@ Game::Game(sf::RenderWindow * win) {
 	
 	for (int i = 0; i < C::RES_X / C::GRID_SIZE; ++i) 
 		walls.push_back(Vector2i(i, lastLine) );
-
-	walls.push_back(Vector2i(0, lastLine-1));
-	walls.push_back(Vector2i(0, lastLine-2));
-	walls.push_back(Vector2i(0, lastLine-3));
-
-	walls.push_back(Vector2i(cols-1, lastLine - 1));
-	walls.push_back(Vector2i(cols-1, lastLine - 2));
-	walls.push_back(Vector2i(cols-1, lastLine - 3));
-
-	walls.push_back(Vector2i(cols >>2, lastLine - 2));
-	walls.push_back(Vector2i(cols >>2, lastLine - 3));
-	walls.push_back(Vector2i(cols >>2, lastLine - 4));
-	walls.push_back(Vector2i((cols >> 2) + 1, lastLine - 4));
 	cacheWalls();
 
 	entities.push_back(new Entity);
@@ -191,7 +178,35 @@ bool Game::hasCollisions(const float posX, const float posY)
 }
 
 void Game::imGui()
-{	
+{
+	if (levelEditorMode)
+	{
+		for (int x = 0; x < C::RES_X / C::GRID_SIZE; ++x)
+		{
+			ImGui::GetBackgroundDrawList()->AddLine(
+				{ (float)(0 + x * C::GRID_SIZE), 0 },
+				{ (float)(0 + x * C::GRID_SIZE), C::RES_Y }, // Note the pixel space!
+				IM_COL32(200, 200, 200, 150),
+				0.5f
+			);
+		}
+
+		for (int y = 0; y < C::RES_Y / C::GRID_SIZE; ++y)
+		{
+			ImGui::GetBackgroundDrawList()->AddLine(
+				{ 0, (float)(0 + y * C::GRID_SIZE) },
+				{ C::RES_X, (float)(0 + y * C::GRID_SIZE) }, // Note the pixel space!
+				IM_COL32(200, 200, 200, 150),
+				0.5f
+			);
+		}
+	}
+
+	if (ImGui::Button("Level Editor"))
+	{
+		levelEditorMode = !levelEditorMode;
+	}
+
 	if (ImGui::CollapsingHeader("Walls"))
 	{
 		for (Vector2i const& wall : walls)

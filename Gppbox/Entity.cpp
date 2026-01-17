@@ -53,7 +53,7 @@ bool Entity::checkTopCollision()
 void Entity::update(double deltaTime)
 {
 	if (has_gravity) dy += GRAVITY_RATE * deltaTime;
-	dy = clamp(dy, -1000.0f, 150.0f);
+	dy = clamp(dy, -150.0f, 150.0f);
 
 	dx *= 0.70f;
 

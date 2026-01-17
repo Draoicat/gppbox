@@ -36,6 +36,8 @@ public:
 	ParticleMan beforeParts;
 	ParticleMan afterParts;
 
+	bool levelEditorMode{ false };
+
 	Game(sf::RenderWindow * win);
 
 	void cacheWalls();
