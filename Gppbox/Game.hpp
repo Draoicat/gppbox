@@ -54,4 +54,5 @@ public:
 
 	bool isWall(int cx, int cy);
 	void imGui();
+	void addWall();
 };

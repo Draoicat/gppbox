@@ -29,6 +29,7 @@ Game::Game(sf::RenderWindow * win) {
 	
 	for (int i = 0; i < C::RES_X / C::GRID_SIZE; ++i) 
 		walls.push_back(Vector2i(i, lastLine) );
+	
 	cacheWalls();
 
 	entities.push_back(new Entity);
@@ -184,21 +185,26 @@ void Game::imGui()
 		for (int x = 0; x < C::RES_X / C::GRID_SIZE; ++x)
 		{
 			ImGui::GetBackgroundDrawList()->AddLine(
-				{ (float)(0 + x * C::GRID_SIZE), 0 },
-				{ (float)(0 + x * C::GRID_SIZE), C::RES_Y }, // Note the pixel space!
-				IM_COL32(200, 200, 200, 150),
-				0.5f
+				{ (float)(0 + x * C::GRID_SIZE), 0 }, { (float)(0 + x * C::GRID_SIZE), C::RES_Y }, IM_COL32(200, 200, 200, 150), 0.5f
 			);
 		}
 
 		for (int y = 0; y < C::RES_Y / C::GRID_SIZE; ++y)
 		{
 			ImGui::GetBackgroundDrawList()->AddLine(
-				{ 0, (float)(0 + y * C::GRID_SIZE) },
-				{ C::RES_X, (float)(0 + y * C::GRID_SIZE) }, // Note the pixel space!
-				IM_COL32(200, 200, 200, 150),
-				0.5f
+				{ 0, (float)(0 + y * C::GRID_SIZE) }, { C::RES_X, (float)(0 + y * C::GRID_SIZE) }, IM_COL32(200, 200, 200, 150), 0.5f
 			);
+		}
+
+		/*ImGui::GetBackgroundDrawList()->AddRect(
+			ImVec2(ImGui::GetMousePos().x, ImGui::GetMousePos().y),  
+			ImVec2((ImGui::GetMousePos().x + C::GRID_SIZE), (ImGui::GetMousePos().y + C::GRID_SIZE)),
+			IM_COL32(07, 255, 07, 255)
+		);*/
+
+		if (ImGui::IsMouseDown(0))
+		{
+			addWall();
 		}
 	}
 
@@ -220,4 +226,18 @@ void Game::imGui()
 	{
 		for (Entity* e : entities) e->imGui();
 	}
+}
+
+void Game::addWall()
+{
+	int x = ImGui::GetMousePos().x / C::GRID_SIZE;
+	int y = ImGui::GetMousePos().y / C::GRID_SIZE;
+	for (Vector2i& wall : walls)
+	{
+		if (wall.x == x && wall.y == y) 
+			return;
+	}
+	printf("Putting Wall");
+	walls.push_back(Vector2i(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE));
+	cacheWalls();
 }
