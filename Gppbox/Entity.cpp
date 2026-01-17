@@ -20,8 +20,14 @@ Entity::Entity(sf::Shape* sprite) : sprite{ sprite }
 void Entity::jump()
 {
 	if (!checkBottomCollision() || is_jumping) return;
-	dy -= JUMP_FORCE;
+	dy -= MAX_JUMP_FORCE;
 	is_jumping = true;
+}
+
+void Entity::stop_jump()
+{
+	if (!is_jumping || checkBottomCollision()) return;
+	dy = 0;
 }
 
 bool Entity::checkLeftCollision()
@@ -48,8 +54,9 @@ void Entity::update(double deltaTime)
 {
 	if (has_gravity) dy += GRAVITY_RATE * deltaTime;
 	dy = clamp(dy, -1000.0f, 150.0f);
-	//dx *= 1 - clamp((float) deltaTime * 0.96f, 0.0f, 1.0f);
+
 	dx *= 0.70f;
+
 	rx += dx * deltaTime;
 	ry += dy * deltaTime;
 
@@ -139,22 +146,23 @@ void Entity::syncPosition()
 
 void Entity::imGui()
 {
-	if (!ImGui::TreeNode("Player")) return;
+	if (ImGui::TreeNode("Player"))
+	{
+		ImGui::Value("cx", cx);
+		ImGui::Value("cy", cy);
 
-	ImGui::Value("cx", cx);
-	ImGui::Value("cy", cy);
+		ImGui::Value("rx", rx);
+		ImGui::Value("ry", ry);
 
-	ImGui::Value("rx", rx);
-	ImGui::Value("ry", ry);
+		ImGui::Value("dx", dx);
+		ImGui::Value("dy", dy);
 
-	ImGui::Value("dx", dx);
-	ImGui::Value("dy", dy);
+		ImGui::Value("Is Jumping", is_jumping);
 
-	ImGui::Value("Is Jumping", is_jumping);
+		if (ImGui::Button("Set Grid Position (5, 5)")) setGridCoord(5, 5);
 
-	if (ImGui::Button("Set Grid Position (5, 5)")) setGridCoord(5, 5);
+		(ImGui::Checkbox("Enable Gravity", &has_gravity));
 
-	(ImGui::Checkbox("Enable Gravity", &has_gravity));
-
-	ImGui::TreePop();
+		ImGui::TreePop();
+	}
 }

@@ -28,8 +28,10 @@ public:
 	float const SPEED{ 10.0f };
 
 	void jump();
+	void stop_jump();
 	bool is_jumping{ false };
-	const float JUMP_FORCE{ 40.0f };
+	const float MIN_JUMP_FORCE{ 15.0f };
+	const float MAX_JUMP_FORCE{ 40.0f };
 
 	// Collisions
 	bool checkLeftCollision();

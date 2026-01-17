@@ -77,6 +77,8 @@ void Game::processInput(sf::Event ev) {
 static double g_time = 0.0;
 static double g_tickTimer = 0.0;
 
+float jump_time = 0.0f;
+
 void Game::pollInput(double dt) {
 	float lateralSpeed = 8.0;
 	float maxSpeed = 40.0;
@@ -99,15 +101,16 @@ void Game::pollInput(double dt) {
 
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
-		if (!wasPressed) {
+		if (!wasPressed) { // started
 			onSpacePressed();
 			wasPressed = true;
 		}
 	}
-	else {
+	else { // release =
+		if (!wasPressed) return;
 		wasPressed = false;
+		entities[0]->stop_jump();
 	}
-
 }
 
 static sf::VertexArray va;
@@ -188,20 +191,18 @@ bool Game::hasCollisions(const float posX, const float posY)
 }
 
 void Game::imGui()
-{
-	if (ImGui::TreeNodeEx("Walls", 0))
+{	
+	if (ImGui::CollapsingHeader("Walls"))
 	{
 		for (Vector2i const& wall : walls)
 		{
 			ImGui::Value("x", wall.x);
 			ImGui::Value("y", wall.y);
 		}
-		ImGui::TreePop();
 	}
 
-	if (ImGui::TreeNodeEx("Entities", ImGuiTreeNodeFlags_DefaultOpen))
+	if (ImGui::CollapsingHeader("Entities", ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		for (Entity* e : entities) e->imGui();
-		ImGui::TreePop();
 	}
 }
