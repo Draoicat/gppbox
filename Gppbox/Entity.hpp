@@ -11,7 +11,7 @@ public:
 
 	static int entityCount;
 
-	int id;
+	int id{ 0 };
 	bool isPlayer{ false };
 
 	// Case Coordinates

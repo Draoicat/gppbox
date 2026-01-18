@@ -73,6 +73,7 @@ float jump_time = 0.0f;
 
 void Game::pollInput(double dt) {
 	if (isGameOver) return;
+
 	float lateralSpeed = 8.0;
 	float maxSpeed = 40.0;
 
@@ -115,7 +116,9 @@ int blendModeIndex(sf::BlendMode bm) {
 	return 4;
 };
 
-void Game::update(double dt) {
+void Game::update(double dt)
+{
+	if (isLevelEditorOn) return;
 
 	g_time += dt;
 
@@ -201,6 +204,7 @@ void Game::imGui()
 {
 	if (isLevelEditorOn)
 	{
+		// draw editor grid
 		for (int x = 0; x < C::RES_X / C::GRID_SIZE; ++x)
 		{
 			ImGui::GetBackgroundDrawList()->AddLine(
@@ -215,15 +219,17 @@ void Game::imGui()
 			);
 		}
 
-		//todo show what I'm gonna do
-		/*ImGui::GetBackgroundDrawList()->AddRect(
-			ImVec2(ImGui::GetMousePos().x, ImGui::GetMousePos().y),  
-			ImVec2((ImGui::GetMousePos().x + C::GRID_SIZE), (ImGui::GetMousePos().y + C::GRID_SIZE)),
-			IM_COL32(07, 255, 07, 255)
-		);*/
+		// preview wall
+		if (levelEditorMode == WALL)
+		{
+			ImGui::GetBackgroundDrawList()->AddRect(
+				ImVec2((int) ImGui::GetMousePos().x % C::GRID_SIZE, (int) ImGui::GetMousePos().y % C::GRID_SIZE),
+				ImVec2((((int)ImGui::GetMousePos().x % C::GRID_SIZE) + C::GRID_SIZE), (((int)ImGui::GetMousePos().y % C::GRID_SIZE) + C::GRID_SIZE)),
+				IM_COL32(07, 255, 07, 75)
+			);
+		}
 
-
-
+		// mouse click
 		if (ImGui::IsMouseClicked(0))
 		{
 			placeWallMode = false;
@@ -240,6 +246,7 @@ void Game::imGui()
 			}
 		}
 
+		// mouse hold
 		if (ImGui::IsMouseDown(0))
 		{
 			switch (levelEditorMode)
@@ -257,16 +264,15 @@ void Game::imGui()
 
 	}
 
+	// level editor button
 	if (ImGui::Button("Level Editor"))
 	{
 		isLevelEditorOn = !isLevelEditorOn;
 	}
 	
-
-
+	// level editor menu
 	if (isLevelEditorOn)
 	{
-		ImGui::Value("Place Wall Mode", (int) placeWallMode);
 		int levelEditorModeInt = (int) levelEditorMode;
         ImGui::RadioButton("Wall", &levelEditorModeInt, 0); ImGui::SameLine();
         ImGui::RadioButton("Enemy", &levelEditorModeInt, 1);
