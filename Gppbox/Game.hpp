@@ -12,6 +12,12 @@
 #include "Particle.hpp"
 #include "ParticleMan.hpp"
 
+enum EditorMode 
+{
+	WALL = 0,
+	ENEMY = 1
+};
+
 class HotReloadShader;
 class Game {
 public:
@@ -34,7 +40,9 @@ public:
 	ParticleMan beforeParts;
 	ParticleMan afterParts;
 
-	bool levelEditorMode{ false };
+	bool isLevelEditorOn{ false };
+	EditorMode levelEditorMode{ WALL };
+	bool placeWallMode{ true };
 
 	Game(sf::RenderWindow * win);
 
@@ -52,8 +60,9 @@ public:
 
 	bool isWall(int cx, int cy);
 	void imGui();
-	void addWall(int const x, int const y);
-	void removeWall(int const x, int const y);
+	void addWall(float const x, float const y);
+	void removeWall(float const x, float const y);
+	void addEnemy(float const x, float const y);
 
 	bool isGameOver{ false };
 	void gameOver();

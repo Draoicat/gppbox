@@ -73,6 +73,7 @@ static double g_tickTimer = 0.0;
 float jump_time = 0.0f;
 
 void Game::pollInput(double dt) {
+	if (isGameOver) return;
 	float lateralSpeed = 8.0;
 	float maxSpeed = 40.0;
 
@@ -86,13 +87,10 @@ void Game::pollInput(double dt) {
 		player->dx += Entity::SPEED;
 	}
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
-
-	}
-
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::T)) {
-
+		
 	}
+	
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
 		if (!wasPressed) { // started
 			onSpacePressed();
@@ -136,8 +134,6 @@ void Game::update(double dt) {
 
 	beforeParts.update(dt);
 	afterParts.update(dt);
-
-	if (isGameOver) return; //todo improve lol
 	
 	pollInput(dt);
 
@@ -204,7 +200,7 @@ void Game::gameOver()
 
 void Game::imGui()
 {
-	if (levelEditorMode)
+	if (isLevelEditorOn)
 	{
 		for (int x = 0; x < C::RES_X / C::GRID_SIZE; ++x)
 		{
@@ -220,7 +216,6 @@ void Game::imGui()
 			);
 		}
 
-
 		//todo show what I'm gonna do
 		/*ImGui::GetBackgroundDrawList()->AddRect(
 			ImVec2(ImGui::GetMousePos().x, ImGui::GetMousePos().y),  
@@ -228,24 +223,55 @@ void Game::imGui()
 			IM_COL32(07, 255, 07, 255)
 		);*/
 
+
+
+		if (ImGui::IsMouseClicked(0))
+		{
+			placeWallMode = false;
+			for (Vector2i& wall : walls)
+				if (wall.x == (int) ImGui::GetMousePos().x / C::GRID_SIZE && wall.y == (int) ImGui::GetMousePos().y / C::GRID_SIZE) 
+					placeWallMode = true;
+			switch (levelEditorMode)
+			{
+			case ENEMY:
+				addEnemy(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE);
+				break;
+			default:
+				break;
+			}
+		}
+
 		if (ImGui::IsMouseDown(0))
 		{
-			addWall(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE);
+			switch (levelEditorMode)
+			{
+			case WALL:
+				if (!placeWallMode)
+					addWall(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE);
+				else
+					removeWall(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE);
+				break;
+			default:
+				break;
+			}
 		}
+
 	}
 
 	if (ImGui::Button("Level Editor"))
 	{
-		levelEditorMode = !levelEditorMode;
+		isLevelEditorOn = !isLevelEditorOn;
 	}
+	
 
-	if (ImGui::CollapsingHeader("Walls"))
+
+	if (isLevelEditorOn)
 	{
-		for (Vector2i const& wall : walls)
-		{
-			ImGui::Value("x", wall.x);
-			ImGui::Value("y", wall.y);
-		}
+		ImGui::Value("Place Wall Mode", (int) placeWallMode);
+		int levelEditorModeInt = (int) levelEditorMode;
+        ImGui::RadioButton("Wall", &levelEditorModeInt, 0); ImGui::SameLine();
+        ImGui::RadioButton("Enemy", &levelEditorModeInt, 1);
+		levelEditorMode = (EditorMode) levelEditorModeInt;
 	}
 
 	if (ImGui::CollapsingHeader("Entities", ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen))
@@ -254,22 +280,33 @@ void Game::imGui()
 	}
 }
 
-void Game::addWall(int const x, int const y)
+void Game::addEnemy(float const x, float const y)
 {
-	for (Vector2i& wall : walls)
-		if (wall.x == x && wall.y == y) 
+	for (Entity* e : entities)
+		if (e->cx == (int) x && e->cy == (int) y) 
 			return;
-	printf("Putting Wall at : (%d, %d)\n", x, y);
-	walls.push_back(Vector2i(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE));
+	printf("Putting Enemy at : (%f, %f)\n", x, y);
+	entities.push_back(new Entity(	{x, y}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
 	cacheWalls();
 }
 
-void Game::removeWall(int const x, int const y)
+void Game::addWall(float const x, float const y)
 {
 	for (Vector2i& wall : walls)
-		if (wall.x == x && wall.y == y) 
+		if (wall.x == (int) x && wall.y == (int) y) //don't place two walls at the same spot 
 			return;
-	printf("Removing Wall at : (%d, %d)\n", x, y);
-	//todo removeWall
+	printf("Putting Wall at : (%f, %f)\n", x, y);
+	walls.push_back(Vector2i(x, y));
+	cacheWalls();
+}
+
+void Game::removeWall(float const x, float const y)
+{
+	for (Vector2i& wall : walls)
+		if (wall.x == (int) x && wall.y == (int) y) //don't remove a wall that doesn't exist
+		{
+			printf("Removing Wall at : (%f, %f)\n", x, y);
+			walls.erase(std::remove(walls.begin(), walls.end(), wall), walls.end());
+		}
 	cacheWalls();
 }
