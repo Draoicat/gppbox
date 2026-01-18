@@ -1,7 +1,6 @@
 #include <imgui.h>
 #include <string>
 
-#include "C.hpp"
 #include "Entity.hpp"
 #include "Game.hpp"
 
@@ -44,7 +43,6 @@ void Entity::stop_jump()
 
 bool Entity::checkLeftCollision()
 {
-	
 	return Game::instance->hasCollisions(cx - 1, cy) && rx <= 0.3f;
 }
 

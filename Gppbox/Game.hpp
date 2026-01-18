@@ -12,6 +12,8 @@
 #include "Particle.hpp"
 #include "ParticleMan.hpp"
 
+#include "C.hpp"
+
 enum EditorMode 
 {
 	WALL = 0,
@@ -43,6 +45,8 @@ public:
 	bool isLevelEditorOn{ false };
 	EditorMode levelEditorMode{ WALL };
 	bool placeWallMode{ true };
+
+	int enemyCount{ C::ENEMY_COUNT };
 
 	Game(sf::RenderWindow * win);
 

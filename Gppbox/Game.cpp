@@ -3,7 +3,6 @@
 #include <vector>
 #include <iostream>
 
-#include "C.hpp"
 #include "Game.hpp"
 
 #include "HotReloadShader.hpp"
@@ -36,7 +35,7 @@ Game::Game(sf::RenderWindow * win) {
 	entities.push_back(new Entity({3, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2})); 
 
 	//enemies
-	for (int i = 0; i < C::ENEMY_COUNT; ++i)
+	for (int i = 0; i < enemyCount; ++i)
 		entities.push_back(new Entity({80, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
 }
 
@@ -124,7 +123,7 @@ void Game::update(double dt) {
 		e->update(dt);
 
 	//checkwin
-	for (int i = 1; i <= C::ENEMY_COUNT; ++i)
+	for (int i = 1; i <= enemyCount; ++i)
 	{
 		if (entities[0]->cx == entities[i]->cx && entities[0]->cy == entities[i]->cy)
 			gameOver();
@@ -138,7 +137,7 @@ void Game::update(double dt) {
 	pollInput(dt);
 
 	//enemy movement
-	for (int i = 1; i <= C::ENEMY_COUNT; ++i)
+	for (int i = 1; i <= enemyCount; ++i)
 		entities[i]->dx += ((entities[i]->goLeft) ? -Entity::SPEED : Entity::SPEED);
 }
 
@@ -287,6 +286,7 @@ void Game::addEnemy(float const x, float const y)
 			return;
 	printf("Putting Enemy at : (%f, %f)\n", x, y);
 	entities.push_back(new Entity(	{x, y}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
+	++enemyCount;
 	cacheWalls();
 }
 
