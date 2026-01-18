@@ -32,7 +32,12 @@ Game::Game(sf::RenderWindow * win) {
 	
 	cacheWalls();
 
-	entities.push_back(new Entity(C::GRID_SIZE, C::GRID_SIZE * 2));
+	//player
+	entities.push_back(new Entity({3, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2})); 
+
+	//enemies
+	for (int i = 0; i < C::ENEMY_COUNT; ++i)
+		entities.push_back(new Entity({80, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
 }
 
 void Game::cacheWalls()
@@ -74,11 +79,11 @@ void Game::pollInput(double dt) {
 	Entity* player = entities[0];
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q)) {
-		player->dx -= player->SPEED;
+		player->dx -= Entity::SPEED;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
-		player->dx += player->SPEED;
+		player->dx += Entity::SPEED;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
@@ -120,12 +125,25 @@ void Game::update(double dt) {
 	for (Entity* e : entities)
 		e->update(dt);
 
+	//checkwin
+	for (int i = 1; i <= C::ENEMY_COUNT; ++i)
+	{
+		if (entities[0]->cx == entities[i]->cx && entities[0]->cy == entities[i]->cy)
+			gameOver();
+	}
+
 	if (bgShader) bgShader->update(dt);
 
 	beforeParts.update(dt);
 	afterParts.update(dt);
+
+	if (isGameOver) return; //todo improve lol
 	
 	pollInput(dt);
+
+	//enemy movement
+	for (int i = 1; i <= C::ENEMY_COUNT; ++i)
+		entities[i]->dx += ((entities[i]->goLeft) ? -Entity::SPEED : Entity::SPEED);
 }
 
  void Game::draw(sf::RenderWindow & win) {
@@ -178,6 +196,12 @@ bool Game::hasCollisions(const float posX, const float posY)
 	return isWall(static_cast<int>(posX), static_cast<int>(posY));
 }
 
+void Game::gameOver()
+{
+	//entities.erase(std::remove(entities.begin(), entities.end(), entities[0]), entities.end());
+	isGameOver = true;
+}
+
 void Game::imGui()
 {
 	if (levelEditorMode)
@@ -196,6 +220,8 @@ void Game::imGui()
 			);
 		}
 
+
+		//todo show what I'm gonna do
 		/*ImGui::GetBackgroundDrawList()->AddRect(
 			ImVec2(ImGui::GetMousePos().x, ImGui::GetMousePos().y),  
 			ImVec2((ImGui::GetMousePos().x + C::GRID_SIZE), (ImGui::GetMousePos().y + C::GRID_SIZE)),
@@ -235,5 +261,15 @@ void Game::addWall(int const x, int const y)
 			return;
 	printf("Putting Wall at : (%d, %d)\n", x, y);
 	walls.push_back(Vector2i(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE));
+	cacheWalls();
+}
+
+void Game::removeWall(int const x, int const y)
+{
+	for (Vector2i& wall : walls)
+		if (wall.x == x && wall.y == y) 
+			return;
+	printf("Removing Wall at : (%d, %d)\n", x, y);
+	//todo removeWall
 	cacheWalls();
 }

@@ -1,20 +1,30 @@
 #include <imgui.h>
+#include <string>
 
 #include "C.hpp"
 #include "Entity.hpp"
 #include "Game.hpp"
 
-Entity::Entity(float const sizeX, float const sizeY) : sprite{ new sf::RectangleShape({sizeX, sizeY}) }
+int Entity::entityCount = 0;
+float const Entity::SPEED = 10.0f;
+
+Entity::Entity(sf::Vector2f position, sf::Vector2f size) : 
+	sprite{new sf::RectangleShape({size.x, size.y})}
 {
-	sprite->setFillColor(sf::Color::White);
+	if (Entity::entityCount == 0) isPlayer = true;
+	id = entityCount;
+	++entityCount;
+	setGridCoord(position.x, position.y);
+	sprite->setFillColor(isPlayer ? sf::Color::White : sf::Color::Red);
 	sprite->setOutlineColor(sf::Color::Black);
 	sprite->setOrigin({ C::GRID_SIZE * 0.5f, C::GRID_SIZE * 2 });
-	setGridCoord(3,3);
-	sx = sizeX / C::GRID_SIZE;
-	sy = sizeY / C::GRID_SIZE;
+	sx = size.x / C::GRID_SIZE;
+	sy = size.y / C::GRID_SIZE;
+	printf("%f", sprite->getScale().y);
 }
 
-Entity::Entity(sf::Shape* sprite) : sprite{ sprite }
+
+Entity::Entity(sf::Vector2f position, sf::Shape* sprite) : sprite{ sprite }
 {
 	sprite->setOrigin({ C::GRID_SIZE * 0.5f, C::GRID_SIZE * 2 });
 }
@@ -34,6 +44,7 @@ void Entity::stop_jump()
 
 bool Entity::checkLeftCollision()
 {
+	
 	return Game::instance->hasCollisions(cx - 1, cy) && rx <= 0.3f;
 }
 
@@ -67,11 +78,13 @@ void Entity::update(double deltaTime)
 	// collisions
 	if (checkRightCollision())
 	{
+		goLeft = true;
 		dx = 0.0f;
 		rx = 0.7f;
 	}
 	else if (checkLeftCollision())
 	{
+		goLeft = false;
 		dx = 0.0f;
 		rx = 0.3f;
 	}
@@ -148,7 +161,7 @@ void Entity::syncPosition()
 
 void Entity::imGui()
 {
-	if (ImGui::TreeNode("Player"))
+	if (ImGui::TreeNode(isPlayer ? "Player" : ((string)"" += "Enemy " + to_string(id)).c_str()))
 	{
 		ImGui::Value("cx", cx);
 		ImGui::Value("cy", cy);

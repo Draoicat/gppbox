@@ -7,12 +7,10 @@
 #include "SFML/Window.hpp"
 
 #include "sys.hpp"
-
 #include "Entity.hpp"
 
 #include "Particle.hpp"
 #include "ParticleMan.hpp"
-
 
 class HotReloadShader;
 class Game {
@@ -55,4 +53,8 @@ public:
 	bool isWall(int cx, int cy);
 	void imGui();
 	void addWall(int const x, int const y);
+	void removeWall(int const x, int const y);
+
+	bool isGameOver{ false };
+	void gameOver();
 };

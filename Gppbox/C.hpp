@@ -5,4 +5,5 @@ namespace C {
 	static constexpr int RES_X = 1600;
 	static constexpr int RES_Y = 900;
 
+	static constexpr int ENEMY_COUNT = 1;
 }

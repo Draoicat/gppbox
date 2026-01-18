@@ -2,11 +2,17 @@
 #define ENTITY_HPP
 
 #include <SFML/Graphics.hpp>
+//#include <SFML/System/Vector2.hpp>
 
 class Entity
 {
 public:
 	sf::Shape* sprite;
+
+	static int entityCount;
+
+	int id;
+	bool isPlayer{ false };
 
 	// Case Coordinates
 	int cx{ 0 };
@@ -29,7 +35,8 @@ public:
 	bool has_gravity{ true };
 
 	// Actions
-	float const SPEED{ 10.0f };
+	static float const SPEED;
+	bool goLeft{ true }; //enemy
 
 	void jump();
 	void stop_jump();
@@ -43,8 +50,9 @@ public:
 	bool checkBottomCollision();
 	bool checkTopCollision();
 
-	Entity(float const sizeX, float const sizeY);
-	Entity(sf::Shape* shape);
+	// Constructors
+	Entity(sf::Vector2f position, sf::Vector2f size);
+	Entity(sf::Vector2f position, sf::Shape* shape);
 	
 	void update(double deltaTime);
 	void draw(sf::RenderWindow& win);
