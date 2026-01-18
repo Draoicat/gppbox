@@ -16,6 +16,10 @@ public:
 	float rx{ 0.5f };
 	float ry{ 0.5f };
 
+	// Scale
+	float sx{ 1.0f };
+	float sy{ 1.0f };
+
 	// Movement
 	float dx{ 0.0f };
 	float dy{ 0.0f };
@@ -39,7 +43,7 @@ public:
 	bool checkBottomCollision();
 	bool checkTopCollision();
 
-	Entity();
+	Entity(float const sizeX, float const sizeY);
 	Entity(sf::Shape* shape);
 	
 	void update(double deltaTime);

@@ -32,7 +32,7 @@ Game::Game(sf::RenderWindow * win) {
 	
 	cacheWalls();
 
-	entities.push_back(new Entity);
+	entities.push_back(new Entity(C::GRID_SIZE, C::GRID_SIZE * 2));
 }
 
 void Game::cacheWalls()
@@ -204,7 +204,7 @@ void Game::imGui()
 
 		if (ImGui::IsMouseDown(0))
 		{
-			addWall();
+			addWall(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE);
 		}
 	}
 
@@ -228,16 +228,12 @@ void Game::imGui()
 	}
 }
 
-void Game::addWall()
+void Game::addWall(int const x, int const y)
 {
-	int x = ImGui::GetMousePos().x / C::GRID_SIZE;
-	int y = ImGui::GetMousePos().y / C::GRID_SIZE;
 	for (Vector2i& wall : walls)
-	{
 		if (wall.x == x && wall.y == y) 
 			return;
-	}
-	printf("Putting Wall");
+	printf("Putting Wall at : (%d, %d)\n", x, y);
 	walls.push_back(Vector2i(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE));
 	cacheWalls();
 }

@@ -4,12 +4,14 @@
 #include "Entity.hpp"
 #include "Game.hpp"
 
-Entity::Entity() : sprite{ new sf::RectangleShape({C::GRID_SIZE, C::GRID_SIZE * 2}) }
+Entity::Entity(float const sizeX, float const sizeY) : sprite{ new sf::RectangleShape({sizeX, sizeY}) }
 {
 	sprite->setFillColor(sf::Color::White);
 	sprite->setOutlineColor(sf::Color::Black);
 	sprite->setOrigin({ C::GRID_SIZE * 0.5f, C::GRID_SIZE * 2 });
 	setGridCoord(3,3);
+	sx = sizeX / C::GRID_SIZE;
+	sy = sizeY / C::GRID_SIZE;
 }
 
 Entity::Entity(sf::Shape* sprite) : sprite{ sprite }
@@ -37,7 +39,7 @@ bool Entity::checkLeftCollision()
 
 bool Entity::checkRightCollision()
 {
-	return Game::instance->hasCollisions(cx + 1, cy) && rx >= 0.7f;
+	return Game::instance->hasCollisions(cx + sx + 1, cy) && rx >= 0.7f;
 }
 
 bool Entity::checkBottomCollision()
@@ -47,7 +49,7 @@ bool Entity::checkBottomCollision()
 
 bool Entity::checkTopCollision()
 {
-	return Game::instance->hasCollisions(cx, cy - 1);
+	return Game::instance->hasCollisions(cx, cy - sy- 1) && ry <= 0.02;
 }
 
 void Entity::update(double deltaTime)
