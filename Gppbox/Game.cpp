@@ -244,7 +244,7 @@ void Game::imGui(sf::RenderWindow& win)
 		}
 
 		// mouse click
-		if (ImGui::IsMouseClicked(0))
+		if (ImGui::IsMouseClicked(0) && !ImGui::GetIO().WantCaptureMouse)
 		{
 			placeWallMode = false;
 			for (Vector2i& wall : walls)
@@ -261,7 +261,7 @@ void Game::imGui(sf::RenderWindow& win)
 		}
 
 		// mouse hold
-		if (ImGui::IsMouseDown(0))
+		if (ImGui::IsMouseDown(0) && !ImGui::GetIO().WantCaptureMouse)
 		{
 			switch (levelEditorMode)
 			{
@@ -275,7 +275,6 @@ void Game::imGui(sf::RenderWindow& win)
 				break;
 			}
 		}
-
 	}
 	
 	// level editor menu
