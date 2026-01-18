@@ -63,7 +63,7 @@ public:
 	void draw(sf::RenderWindow& win);
 
 	bool isWall(int cx, int cy);
-	void imGui();
+	void imGui(sf::RenderWindow& win);
 	void addWall(float const x, float const y);
 	void removeWall(float const x, float const y);
 	void addEnemy(float const x, float const y);

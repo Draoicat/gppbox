@@ -200,8 +200,14 @@ void Game::gameOver()
 	isGameOver = true;
 }
 
-void Game::imGui()
+void Game::imGui(sf::RenderWindow& win)
 {
+	// level editor button
+	if (ImGui::Button("Level Editor"))
+	{
+		isLevelEditorOn = !isLevelEditorOn;
+	}
+
 	if (isLevelEditorOn)
 	{
 		// draw editor grid
@@ -219,14 +225,22 @@ void Game::imGui()
 			);
 		}
 
-		// preview wall
-		if (levelEditorMode == WALL)
+		sf::RectangleShape fakeWall(Vector2f(C::GRID_SIZE, C::GRID_SIZE));
+		sf::RectangleShape fakeEnemy(Vector2f(C::GRID_SIZE, C::GRID_SIZE * 2));
+		// Preview
+		switch (levelEditorMode)
 		{
-			ImGui::GetBackgroundDrawList()->AddRect(
-				ImVec2((int) ImGui::GetMousePos().x % C::GRID_SIZE, (int) ImGui::GetMousePos().y % C::GRID_SIZE),
-				ImVec2((((int)ImGui::GetMousePos().x % C::GRID_SIZE) + C::GRID_SIZE), (((int)ImGui::GetMousePos().y % C::GRID_SIZE) + C::GRID_SIZE)),
-				IM_COL32(07, 255, 07, 75)
-			);
+		case WALL:
+			fakeWall.setPosition((int) (ImGui::GetMousePos().x / C::GRID_SIZE) * C::GRID_SIZE, (int) (ImGui::GetMousePos().y / C::GRID_SIZE) * C::GRID_SIZE);
+			fakeWall.setFillColor(sf::Color(0x07ff0777));
+			win.draw(fakeWall);
+			break;
+		case ENEMY:
+			fakeEnemy.setFillColor(sf::Color::Red);
+			fakeEnemy.setOrigin({ C::GRID_SIZE * 0.5f, C::GRID_SIZE * 2 });
+			fakeEnemy.setPosition((int) (ImGui::GetMousePos().x / C::GRID_SIZE) * C::GRID_SIZE, (int) (ImGui::GetMousePos().y / C::GRID_SIZE) * C::GRID_SIZE);
+			win.draw(fakeEnemy);
+			break;
 		}
 
 		// mouse click
@@ -262,12 +276,6 @@ void Game::imGui()
 			}
 		}
 
-	}
-
-	// level editor button
-	if (ImGui::Button("Level Editor"))
-	{
-		isLevelEditorOn = !isLevelEditorOn;
 	}
 	
 	// level editor menu
