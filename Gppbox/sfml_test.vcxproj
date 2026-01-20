@@ -185,7 +185,7 @@
     <ClInclude Include="Bloom.hpp" />
     <ClInclude Include="C.hpp" />
     <ClInclude Include="Dice.hpp" />
-    <ClInclude Include="Enemy.h" />
+    <ClInclude Include="Enemy.hpp" />
     <ClInclude Include="Entity.hpp" />
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="HotReloadShader.hpp" />
@@ -196,8 +196,8 @@
     <ClInclude Include="libs\imgui\imgui.h" />
     <ClInclude Include="Particle.hpp" />
     <ClInclude Include="ParticleMan.hpp" />
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="Projectile.h" />
+    <ClInclude Include="Player.hpp" />
+    <ClInclude Include="Projectile.hpp" />
     <ClInclude Include="sys.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -4,44 +4,24 @@
 #include "Entity.hpp"
 #include "Game.hpp"
 
-std::string Entity::get_type_name() const
-{
-	switch (this->type)
-	{
-	case Player:
-		return "Player";
-	case Enemy:
-		return "Enemy";
-	case Projectile:
-		return "Projectile";
-	}
-	return "";
-}
-
 int Entity::entityCount = 0;
 float const Entity::SPEED = 10.0f;
 
-Entity::Entity(EntityType type, sf::Vector2f position, sf::Vector2f size)
+Entity::Entity(sf::Vector2f position, sf::Vector2f size)
 {
 	id = entityCount;
 	++entityCount;
 	sx = size.x / C::GRID_SIZE;
 	sy = size.y / C::GRID_SIZE;
-	this->type = type;
 
 	sprite = new RectangleShape({size.x, size.y});
 	sprite->setOrigin({size.x * 0.5f,  size.y});
-
-	sprite->setFillColor(type != Enemy ? sf::Color::White : sf::Color::Red);
-	sprite->setOutlineColor(sf::Color::Black);
+	sprite->setFillColor(sf::Color::White);
 	set_grid_coordinates(position.x, position.y);
-
-	if (type == Projectile) has_gravity = false;
 }
 
-Entity::Entity(EntityType type, sf::Vector2f position, sf::Vector2f size, sf::Shape* sprite) : 
-	sprite{sprite},
-	type{type}
+Entity::Entity(sf::Vector2f position, sf::Vector2f size, sf::Shape* sprite) : 
+	sprite{sprite}
 {
 	id = entityCount;
 	++entityCount;

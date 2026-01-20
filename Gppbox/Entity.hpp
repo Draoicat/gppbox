@@ -7,15 +7,7 @@
 class Entity
 {
 public:
-
-	enum EntityType
-	{
-		Player, Enemy, Projectile,
-	};
-
-	std::string get_type_name() const;
-
-	EntityType type;
+	virtual std::string get_type_name() const = 0;
 
 	sf::Shape* sprite;
 
@@ -30,7 +22,7 @@ public:
 	float rx{ 0.5f };
 	float ry{ 0.5f };
 
-	// Scale
+	// Scale in case units
 	int sx{ 1 };
 	int sy{ 1 };
 
@@ -53,15 +45,14 @@ public:
 	const float MAX_JUMP_FORCE{ 40.0f };
 
 	// Collisions
-	bool hasCollidedThisFrame{ false };
 	bool check_left_collision();
 	bool check_right_collision();
 	bool check_bottom_collision();
 	bool check_top_collision();
 
 	// Constructors
-	Entity(EntityType type, sf::Vector2f position, sf::Vector2f size);
-	Entity(EntityType type, sf::Vector2f position, sf::Vector2f size, sf::Shape* shape);
+	Entity(sf::Vector2f position, sf::Vector2f size);
+	Entity(sf::Vector2f position, sf::Vector2f size, sf::Shape* shape);
 	
 	void update(double deltaTime);
 	void draw(sf::RenderWindow& win);
