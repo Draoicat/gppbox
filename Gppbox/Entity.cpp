@@ -4,61 +4,93 @@
 #include "Entity.hpp"
 #include "Game.hpp"
 
+std::string Entity::get_type_name() const
+{
+	switch (this->type)
+	{
+	case Player:
+		return "Player";
+	case Enemy:
+		return "Enemy";
+	case Projectile:
+		return "Projectile";
+	}
+	return "";
+}
+
 int Entity::entityCount = 0;
 float const Entity::SPEED = 10.0f;
 
-Entity::Entity(sf::Vector2f position, sf::Vector2f size) : 
-	sprite{new sf::RectangleShape({size.x, size.y})}
+Entity::Entity(EntityType type, sf::Vector2f position, sf::Vector2f size)
 {
-	if (Entity::entityCount == 0) isPlayer = true;
 	id = entityCount;
 	++entityCount;
-	setGridCoord(position.x, position.y);
-	sprite->setFillColor(isPlayer ? sf::Color::White : sf::Color::Red);
-	sprite->setOutlineColor(sf::Color::Black);
-	sprite->setOrigin({ C::GRID_SIZE * 0.5f, C::GRID_SIZE * 2 });
 	sx = size.x / C::GRID_SIZE;
 	sy = size.y / C::GRID_SIZE;
-	printf("%f", sprite->getScale().y);
+	this->type = type;
+
+	sprite = new RectangleShape({size.x, size.y});
+	sprite->setOrigin({size.x * 0.5f,  size.y});
+
+	sprite->setFillColor(type != Enemy ? sf::Color::White : sf::Color::Red);
+	sprite->setOutlineColor(sf::Color::Black);
+	set_grid_coordinates(position.x, position.y);
+
+	if (type == Projectile) has_gravity = false;
 }
 
-
-Entity::Entity(sf::Vector2f position, sf::Shape* sprite) : sprite{ sprite }
+Entity::Entity(EntityType type, sf::Vector2f position, sf::Vector2f size, sf::Shape* sprite) : 
+	sprite{sprite},
+	type{type}
 {
-	sprite->setOrigin({ C::GRID_SIZE * 0.5f, C::GRID_SIZE * 2 });
+	id = entityCount;
+	++entityCount;
+	sx = size.x / C::GRID_SIZE;
+	sy = size.y / C::GRID_SIZE;
+
+	sprite->setOrigin({size.x * 0.5f,  size.y});
+	set_grid_coordinates(position.x, position.y);
 }
 
 void Entity::jump()
 {
-	if (!checkBottomCollision() || is_jumping) return;
+	if (!check_bottom_collision() || is_jumping) return;
 	dy -= MAX_JUMP_FORCE;
 	is_jumping = true;
 }
 
 void Entity::stop_jump()
 {
-	if (!is_jumping || checkBottomCollision()) return;
+	if (!is_jumping || check_bottom_collision()) return;
 	dy = 0;
 }
 
-bool Entity::checkLeftCollision()
+bool Entity::check_left_collision()
 {
-	return Game::instance->hasCollisions(cx - 1, cy) && rx <= 0.3f;
+	for (int y = cy; y > cy - sy; --y)
+	{
+		if (Game::instance->hasCollisions(cx - 1, y) && rx <= 0.3f) return true;
+	}
+	return false;
 }
 
-bool Entity::checkRightCollision()
+bool Entity::check_right_collision()
 {
-	return Game::instance->hasCollisions(cx + sx + 1, cy) && rx >= 0.7f;
+	for (int y = cy; y > cy - sy; --y)
+	{
+		if (Game::instance->hasCollisions(cx + 1, y) && rx >= 0.7f) return true;
+	}
+	return false;
 }
 
-bool Entity::checkBottomCollision()
+bool Entity::check_bottom_collision()
 {
 	return Game::instance->hasCollisions(cx, cy + 1);
 }
 
-bool Entity::checkTopCollision()
+bool Entity::check_top_collision()
 {
-	return Game::instance->hasCollisions(cx, cy - sy- 1) && ry <= 0.02;
+	return Game::instance->hasCollisions(cx, cy - sy) && ry >= 0.98;
 }
 
 void Entity::update(double deltaTime)
@@ -73,55 +105,73 @@ void Entity::update(double deltaTime)
 
 	if (is_jumping && dy > 0) is_jumping = false;
 
+	hasCollidedThisFrame = false;
+
 	// collisions
-	if (checkRightCollision())
+	if (check_right_collision())
 	{
-		goLeft = true;
+		if (type == Enemy) goLeft = true;
 		dx = 0.0f;
 		rx = 0.7f;
+		hasCollidedThisFrame = true;
 	}
-	else if (checkLeftCollision())
+	else
 	{
-		goLeft = false;
+		if (rx > 1.0f)
+		{
+			--rx;
+			++cx;
+		}
+	}
+
+	if (check_left_collision())
+	{
+		if (type == Enemy) goLeft = false;
 		dx = 0.0f;
 		rx = 0.3f;
+		hasCollidedThisFrame = true;
+	}
+	else
+	{
+		if (rx < 0.0f)
+		{
+			++rx;
+			--cx;
+		}
 	}
 
-	if (checkBottomCollision() && !is_jumping) 
+	if (check_bottom_collision() && !is_jumping)
 	{
-		ry = 0.98;
+		ry = 0.98f;
 		dy = 0.0f;
+		hasCollidedThisFrame = true;
 	}
-	else if (checkTopCollision()) 
+	else
 	{
-		ry = 0.02;
-		dy = 0.0f;
+		if (ry > 1.0f)
+		{
+			--ry;
+			++cy;
+		}
 	}
-	
+
+	if (check_top_collision())
+	{
+		ry = 0.98f;
+		dy = 0.0f;
+		hasCollidedThisFrame = true;
+	}
+	else
+	{
+		if (ry < 0.0f)
+		{
+			++ry;
+			--cy;
+		}
+	}
+
 	// update position
-	if (rx > 1.0f)
-	{
-		--rx;
-		++cx;
-	}
-	else if (rx < 0.0f)
-	{
-		++rx;
-		--cx;
-	}
-
-	if (ry > 1.0f)
-	{
-		--ry;
-		++cy;
-	}
-	else if (ry < 0.0f)
-	{
-		++ry;
-		--cy;
-	}
-
-	syncPosition();
+	synchronise_position();
 }
 
 void Entity::draw(sf::RenderWindow& win)
@@ -130,36 +180,36 @@ void Entity::draw(sf::RenderWindow& win)
 	win.draw(*sprite);
 }
 
-void Entity::setPixelCoord(int px, int py)
+void Entity::set_pixel_coordinates(int px, int py)
 {
 	cx = px / C::GRID_SIZE;
 	cy = py / C::GRID_SIZE;
 
-	rx = (px - (cx * C::GRID_SIZE)) / (float)C::GRID_SIZE;
-	ry = (py - (cy * C::GRID_SIZE)) / (float)C::GRID_SIZE;
+	rx = (px - (cx * C::GRID_SIZE)) / static_cast<float>(C::GRID_SIZE);
+	ry = (py - (cy * C::GRID_SIZE)) / static_cast<float>(C::GRID_SIZE);
 
-	syncPosition();
+	synchronise_position();
 }
 
-void Entity::setGridCoord(float coordX, float coordY)
+void Entity::set_grid_coordinates(float xCoordinates, float yCoordinates)
 {
-	cx = (int)coordX;
-	cy = (int)coordY;
+	cx = static_cast<int>(xCoordinates);
+	cy = static_cast<int>(yCoordinates);
 
-	rx = coordX - cx;
-	ry = coordY - cy;
+	rx = xCoordinates - cx;
+	ry = yCoordinates - cy;
 
-	syncPosition();
+	synchronise_position();
 }
 
-void Entity::syncPosition()
+void Entity::synchronise_position()
 {
-	sprite->setPosition({ (cx + rx) * C::GRID_SIZE, (cy + ry) * C::GRID_SIZE });
+	sprite->setPosition({(cx + rx) * C::GRID_SIZE, (cy + ry) * C::GRID_SIZE});
 }
 
-void Entity::imGui()
+void Entity::im_gui()
 {
-	if (ImGui::TreeNode(isPlayer ? "Player" : ((string)"" += "Enemy " + to_string(id)).c_str()))
+	if (ImGui::TreeNode((get_type_name() + " " + to_string(id)).c_str()))
 	{
 		ImGui::Value("cx", cx);
 		ImGui::Value("cy", cy);
@@ -172,7 +222,7 @@ void Entity::imGui()
 
 		ImGui::Value("Is Jumping", is_jumping);
 
-		if (ImGui::Button("Set Grid Position (5, 5)")) setGridCoord(5, 5);
+		if (ImGui::Button("Set Grid Position (5, 5)")) set_grid_coordinates(5, 5);
 
 		(ImGui::Checkbox("Enable Gravity", &has_gravity));
 

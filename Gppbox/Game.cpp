@@ -32,11 +32,14 @@ Game::Game(sf::RenderWindow * win) {
 	cacheWalls();
 
 	//player
-	entities.push_back(new Entity({3, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2})); 
+	sf::RectangleShape playerSprite({C::GRID_SIZE, C::GRID_SIZE * 2});
+	playerSprite.setFillColor( sf::Color::White );
+	playerSprite.setOutlineColor(sf::Color::Black);
+	entities.push_back(new Entity(Entity::EntityType::Player, {3, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2})); 
 
 	//enemies
 	for (int i = 0; i < enemyCount; ++i)
-		entities.push_back(new Entity({80, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
+		entities.push_back(new Entity(Entity::EntityType::Enemy, {80, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
 }
 
 void Game::cacheWalls()
@@ -87,8 +90,8 @@ void Game::pollInput(double dt) {
 		player->dx += Entity::SPEED;
 	}
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::T)) {
-		
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Tab)) {
+		shoot();
 	}
 	
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
@@ -139,9 +142,23 @@ void Game::update(double dt)
 	
 	pollInput(dt);
 
-	//enemy movement
+	//other movement
 	for (int i = 1; i <= enemyCount; ++i)
-		entities[i]->dx += ((entities[i]->goLeft) ? -Entity::SPEED : Entity::SPEED);
+	{
+		switch (entities[i]->type)
+		{
+		case Entity::Enemy:
+			entities[i]->dx += (entities[i]->goLeft) ? -Entity::SPEED / 2 : Entity::SPEED / 2;
+			break;
+		case Entity::Projectile:
+			entities[i]->dx += (entities[i]->goLeft) ? -Entity::SPEED * 2 : Entity::SPEED * 2;
+			if (entities[i]->hasCollidedThisFrame)
+				entities.erase(std::remove(entities.begin(), entities.end(), entities[i]), entities.end());
+			break;
+		default:
+			break;
+		}
+	}
 }
 
  void Game::draw(sf::RenderWindow & win) {
@@ -182,6 +199,11 @@ bool Game::isWall(int cx, int cy)
 			return true;
 	}
 	return false;
+}
+
+void Game::shoot()
+{
+	entities.push_back(new Entity(Entity::EntityType::Projectile, {(float) entities[0]->cx + 1, (float) entities[0]->cy}, {C::GRID_SIZE, C::GRID_SIZE})); 
 }
 
 bool Game::hasCollisions(const float posX, const float posY)
@@ -288,7 +310,7 @@ void Game::imGui(sf::RenderWindow& win)
 
 	if (ImGui::CollapsingHeader("Entities", ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		for (Entity* e : entities) e->imGui();
+		for (Entity* e : entities) e->im_gui();
 	}
 }
 
@@ -298,10 +320,11 @@ void Game::addEnemy(float const x, float const y)
 		if (e->cx == (int) x && e->cy == (int) y) 
 			return;
 	printf("Putting Enemy at : (%f, %f)\n", x, y);
-	entities.push_back(new Entity(	{x, y}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
+	entities.push_back(new Entity(Entity::EntityType::Enemy, {x, y}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
 	++enemyCount;
 	cacheWalls();
 }
+
 
 void Game::addWall(float const x, float const y)
 {

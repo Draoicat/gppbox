@@ -7,12 +7,20 @@
 class Entity
 {
 public:
+
+	enum EntityType
+	{
+		Player, Enemy, Projectile,
+	};
+
+	std::string get_type_name() const;
+
+	EntityType type;
+
 	sf::Shape* sprite;
 
 	static int entityCount;
-
 	int id{ 0 };
-	bool isPlayer{ false };
 
 	// Case Coordinates
 	int cx{ 0 };
@@ -23,8 +31,8 @@ public:
 	float ry{ 0.5f };
 
 	// Scale
-	float sx{ 1.0f };
-	float sy{ 1.0f };
+	int sx{ 1 };
+	int sy{ 1 };
 
 	// Movement
 	float dx{ 0.0f };
@@ -45,24 +53,25 @@ public:
 	const float MAX_JUMP_FORCE{ 40.0f };
 
 	// Collisions
-	bool checkLeftCollision();
-	bool checkRightCollision();
-	bool checkBottomCollision();
-	bool checkTopCollision();
+	bool hasCollidedThisFrame{ false };
+	bool check_left_collision();
+	bool check_right_collision();
+	bool check_bottom_collision();
+	bool check_top_collision();
 
 	// Constructors
-	Entity(sf::Vector2f position, sf::Vector2f size);
-	Entity(sf::Vector2f position, sf::Shape* shape);
+	Entity(EntityType type, sf::Vector2f position, sf::Vector2f size);
+	Entity(EntityType type, sf::Vector2f position, sf::Vector2f size, sf::Shape* shape);
 	
 	void update(double deltaTime);
 	void draw(sf::RenderWindow& win);
 
-	void setPixelCoord(int px, int py);
-	void setGridCoord(float coordX, float coordY);
+	void set_pixel_coordinates(int px, int py);
+	void set_grid_coordinates(float xCoordinates, float yCoordinates);
 
-	void syncPosition();
+	void synchronise_position();
 
-	void imGui();
+	void im_gui();
 };
 
 #endif

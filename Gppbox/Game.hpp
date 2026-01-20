@@ -68,6 +68,10 @@ public:
 	void removeWall(float const x, float const y);
 	void addEnemy(float const x, float const y);
 
+
+	void shoot();
 	bool isGameOver{ false };
 	void gameOver();
+
+	//Sprites
 };
