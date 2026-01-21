@@ -1,11 +1,12 @@
 #include <imgui.h>
 #include <array>
 #include <vector>
-#include <iostream>
 
 #include "Game.hpp"
 
+#include "Enemy.hpp"
 #include "HotReloadShader.hpp"
+#include "Player.hpp"
 
 Game* Game::instance = 0;
 static int cols = C::RES_X / C::GRID_SIZE;
@@ -35,11 +36,13 @@ Game::Game(sf::RenderWindow * win) {
 	sf::RectangleShape playerSprite({C::GRID_SIZE, C::GRID_SIZE * 2});
 	playerSprite.setFillColor( sf::Color::White );
 	playerSprite.setOutlineColor(sf::Color::Black);
-	entities.push_back(new Entity(Entity::EntityType::Player, {3, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2})); 
+	
+	player = new Player({ 3, 50 }, { C::GRID_SIZE, C::GRID_SIZE * 2 });
+	entities.emplace_back(player);
 
-	//enemies
+	//entities
 	for (int i = 0; i < enemyCount; ++i)
-		entities.push_back(new Entity(Entity::EntityType::Enemy, {80, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
+		entities.emplace_back(new Enemy({80, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
 }
 
 void Game::cacheWalls()
@@ -80,8 +83,6 @@ void Game::pollInput(double dt) {
 	float lateralSpeed = 8.0;
 	float maxSpeed = 40.0;
 
-	Entity* player = entities[0];
-
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q)) {
 		player->dx -= Entity::SPEED;
 	}
@@ -103,7 +104,7 @@ void Game::pollInput(double dt) {
 	else { // release =
 		if (!wasPressed) return;
 		wasPressed = false;
-		entities[0]->stop_jump();
+		player->stop_jump();
 	}
 }
 
@@ -141,24 +142,6 @@ void Game::update(double dt)
 	afterParts.update(dt);
 	
 	pollInput(dt);
-
-	//other movement
-	for (int i = 1; i <= enemyCount; ++i)
-	{
-		switch (entities[i]->type)
-		{
-		case Entity::Enemy:
-			entities[i]->dx += (entities[i]->goLeft) ? -Entity::SPEED / 2 : Entity::SPEED / 2;
-			break;
-		case Entity::Projectile:
-			entities[i]->dx += (entities[i]->goLeft) ? -Entity::SPEED * 2 : Entity::SPEED * 2;
-			if (entities[i]->hasCollidedThisFrame)
-				entities.erase(std::remove(entities.begin(), entities.end(), entities[i]), entities.end());
-			break;
-		default:
-			break;
-		}
-	}
 }
 
  void Game::draw(sf::RenderWindow & win) {
@@ -188,7 +171,7 @@ void Game::update(double dt)
 }
 
 void Game::onSpacePressed() {
-	entities[0]->jump();
+	player->jump();
 }
 
 bool Game::isWall(int cx, int cy)
@@ -203,7 +186,7 @@ bool Game::isWall(int cx, int cy)
 
 void Game::shoot()
 {
-	entities.push_back(new Entity(Entity::EntityType::Projectile, {(float) entities[0]->cx + 1, (float) entities[0]->cy}, {C::GRID_SIZE, C::GRID_SIZE})); 
+	entities.emplace_back(new Projectile({(float) entities[0]->cx + 1, (float) entities[0]->cy}, {C::GRID_SIZE, C::GRID_SIZE})); 
 }
 
 bool Game::hasCollisions(const float posX, const float posY)
@@ -320,7 +303,7 @@ void Game::addEnemy(float const x, float const y)
 		if (e->cx == (int) x && e->cy == (int) y) 
 			return;
 	printf("Putting Enemy at : (%f, %f)\n", x, y);
-	entities.push_back(new Entity(Entity::EntityType::Enemy, {x, y}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
+	entities.emplace_back(new Enemy({x, y}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
 	++enemyCount;
 	cacheWalls();
 }

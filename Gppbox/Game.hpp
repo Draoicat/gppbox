@@ -13,6 +13,9 @@
 #include "ParticleMan.hpp"
 
 #include "C.hpp"
+#include "Enemy.hpp"
+#include "Player.hpp"
+#include "Projectile.hpp"
 
 enum EditorMode 
 {
@@ -37,6 +40,7 @@ public:
 	std::vector<sf::Vector2i>		walls;
 	std::vector<sf::RectangleShape> wallSprites;
 
+	Player* player;
 	std::vector<Entity*>			entities;
 
 	ParticleMan beforeParts;

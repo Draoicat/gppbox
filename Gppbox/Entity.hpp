@@ -2,7 +2,6 @@
 #define ENTITY_HPP
 
 #include <SFML/Graphics.hpp>
-//#include <SFML/System/Vector2.hpp>
 
 class Entity
 {
@@ -31,38 +30,36 @@ public:
 	float dy{ 0.0f };
 
 	// Gravity
-	float const GRAVITY_RATE{ 100.0f };
+	float static constexpr GRAVITY_RATE{ 100.0f };
 	bool has_gravity{ true };
 
 	// Actions
-	static float const SPEED;
-	bool goLeft{ true }; //enemy
+	float static constexpr SPEED{ 15.0f };
 
-	void jump();
-	void stop_jump();
-	bool is_jumping{ false };
-	const float MIN_JUMP_FORCE{ 15.0f };
-	const float MAX_JUMP_FORCE{ 40.0f };
-
-	// Collisions
-	bool check_left_collision();
-	bool check_right_collision();
-	bool check_bottom_collision();
-	bool check_top_collision();
-
-	// Constructors
+	// Constructors & Destructors
 	Entity(sf::Vector2f position, sf::Vector2f size);
-	Entity(sf::Vector2f position, sf::Vector2f size, sf::Shape* shape);
-	
-	void update(double deltaTime);
-	void draw(sf::RenderWindow& win);
+	Entity();
+	virtual ~Entity() = default;
 
+	// Game Loop
+	virtual void update(double deltaTime);
+	void draw(sf::RenderWindow& win);
+	virtual void im_gui();
+
+protected:
+	// Movement
+	virtual void calculateNextPosition(double deltaTime);
+	void handleCollisions();
 	void set_pixel_coordinates(int px, int py);
 	void set_grid_coordinates(float xCoordinates, float yCoordinates);
 
 	void synchronise_position();
 
-	void im_gui();
+	// Collisions
+	virtual bool check_left_collision();
+	virtual bool check_right_collision();
+	virtual bool check_bottom_collision();
+	bool check_top_collision();
 };
 
 #endif

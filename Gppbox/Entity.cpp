@@ -5,7 +5,6 @@
 #include "Game.hpp"
 
 int Entity::entityCount = 0;
-float const Entity::SPEED = 10.0f;
 
 Entity::Entity(sf::Vector2f position, sf::Vector2f size)
 {
@@ -13,37 +12,9 @@ Entity::Entity(sf::Vector2f position, sf::Vector2f size)
 	++entityCount;
 	sx = size.x / C::GRID_SIZE;
 	sy = size.y / C::GRID_SIZE;
-
-	sprite = new RectangleShape({size.x, size.y});
-	sprite->setOrigin({size.x * 0.5f,  size.y});
-	sprite->setFillColor(sf::Color::White);
-	set_grid_coordinates(position.x, position.y);
 }
 
-Entity::Entity(sf::Vector2f position, sf::Vector2f size, sf::Shape* sprite) : 
-	sprite{sprite}
-{
-	id = entityCount;
-	++entityCount;
-	sx = size.x / C::GRID_SIZE;
-	sy = size.y / C::GRID_SIZE;
-
-	sprite->setOrigin({size.x * 0.5f,  size.y});
-	set_grid_coordinates(position.x, position.y);
-}
-
-void Entity::jump()
-{
-	if (!check_bottom_collision() || is_jumping) return;
-	dy -= MAX_JUMP_FORCE;
-	is_jumping = true;
-}
-
-void Entity::stop_jump()
-{
-	if (!is_jumping || check_bottom_collision()) return;
-	dy = 0;
-}
+Entity::Entity() : Entity({0.0, 0.0}, {1.0f, 1.0f}) { }
 
 bool Entity::check_left_collision()
 {
@@ -73,7 +44,7 @@ bool Entity::check_top_collision()
 	return Game::instance->hasCollisions(cx, cy - sy) && ry >= 0.98;
 }
 
-void Entity::update(double deltaTime)
+void Entity::calculateNextPosition(double deltaTime)
 {
 	if (has_gravity) dy += GRAVITY_RATE * deltaTime;
 	dy = clamp(dy, -150.0f, 150.0f);
@@ -82,18 +53,14 @@ void Entity::update(double deltaTime)
 
 	rx += dx * deltaTime;
 	ry += dy * deltaTime;
+}
 
-	if (is_jumping && dy > 0) is_jumping = false;
-
-	hasCollidedThisFrame = false;
-
-	// collisions
+void Entity::handleCollisions()
+{
 	if (check_right_collision())
 	{
-		if (type == Enemy) goLeft = true;
 		dx = 0.0f;
 		rx = 0.7f;
-		hasCollidedThisFrame = true;
 	}
 	else
 	{
@@ -106,10 +73,8 @@ void Entity::update(double deltaTime)
 
 	if (check_left_collision())
 	{
-		if (type == Enemy) goLeft = false;
 		dx = 0.0f;
 		rx = 0.3f;
-		hasCollidedThisFrame = true;
 	}
 	else
 	{
@@ -120,11 +85,10 @@ void Entity::update(double deltaTime)
 		}
 	}
 
-	if (check_bottom_collision() && !is_jumping)
+	if (check_bottom_collision())
 	{
 		ry = 0.98f;
 		dy = 0.0f;
-		hasCollidedThisFrame = true;
 	}
 	else
 	{
@@ -139,7 +103,6 @@ void Entity::update(double deltaTime)
 	{
 		ry = 0.98f;
 		dy = 0.0f;
-		hasCollidedThisFrame = true;
 	}
 	else
 	{
@@ -149,8 +112,14 @@ void Entity::update(double deltaTime)
 			--cy;
 		}
 	}
+}
 
-	// update position
+void Entity::update(double deltaTime)
+{
+	calculateNextPosition(deltaTime);
+
+	handleCollisions();
+
 	synchronise_position();
 }
 
@@ -199,12 +168,6 @@ void Entity::im_gui()
 
 		ImGui::Value("dx", dx);
 		ImGui::Value("dy", dy);
-
-		ImGui::Value("Is Jumping", is_jumping);
-
-		if (ImGui::Button("Set Grid Position (5, 5)")) set_grid_coordinates(5, 5);
-
-		(ImGui::Checkbox("Enable Gravity", &has_gravity));
 
 		ImGui::TreePop();
 	}
