@@ -9,6 +9,12 @@ class Projectile :
 public:
     Projectile(sf::Vector2f position, sf::Vector2f size);
     std::string get_type_name() const override;
+
+    void update(double deltaTime) override;
+
+    bool check_bottom_collision() override;
+
+    int initialCx;
 };
 
 #endif

@@ -127,7 +127,10 @@ void Game::update(double dt)
 	g_time += dt;
 
 	for (Entity* e : entities)
+	{
 		e->update(dt);
+
+	}
 
 	//checkwin
 	for (int i = 1; i <= enemyCount; ++i)
@@ -293,7 +296,8 @@ void Game::imGui(sf::RenderWindow& win)
 
 	if (ImGui::CollapsingHeader("Entities", ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		for (Entity* e : entities) e->im_gui();
+		for (Entity* e : entities) 
+			e->im_gui();
 	}
 }
 
