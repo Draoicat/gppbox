@@ -16,7 +16,7 @@ std::string Enemy::get_type_name() const
 
 void Enemy::update(double deltaTime)
 {
-	if (goLeft) dx += (goLeft) ? -SPEED / 2 : SPEED / 2;
+	dx += (goLeft) ? -SPEED / 2 : SPEED / 2;
 	Entity::update(deltaTime);
 }
 
