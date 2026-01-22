@@ -28,6 +28,7 @@ public:
 	// Movement
 	float dx{ 0.0f };
 	float dy{ 0.0f };
+	bool facesLeft{ false };
 
 	// Gravity
 	float static constexpr GRAVITY_RATE{ 100.0f };

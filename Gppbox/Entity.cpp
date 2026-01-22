@@ -117,6 +117,7 @@ void Entity::handleCollisions()
 void Entity::update(double deltaTime)
 {
 	calculateNextPosition(deltaTime);
+	facesLeft = dx < 0;
 
 	handleCollisions();
 
@@ -168,6 +169,8 @@ void Entity::im_gui()
 
 		ImGui::Value("dx", dx);
 		ImGui::Value("dy", dy);
+
+		ImGui::Value("facesLeft", facesLeft);
 
 		ImGui::TreePop();
 	}

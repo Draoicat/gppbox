@@ -144,7 +144,15 @@ void Game::update(double dt)
 	beforeParts.update(dt);
 	afterParts.update(dt);
 	
+	// INPUTS
+	if (lastShotDT < 1 / playerShootRatePerSeconds) lastShotDT += dt;
+	else
+	{
+		lastShotDT = 0.0f;
+		canPlayerShoot = true;
+	}
 	pollInput(dt);
+
 }
 
  void Game::draw(sf::RenderWindow & win) {
@@ -189,7 +197,9 @@ bool Game::isWall(int cx, int cy)
 
 void Game::shoot()
 {
-	entities.emplace_back(new Projectile({(float) entities[0]->cx + 1, (float) entities[0]->cy}, {C::GRID_SIZE, C::GRID_SIZE})); 
+	if (!canPlayerShoot) return;
+	canPlayerShoot = false;
+	entities.emplace_back(new Projectile({(float) entities[0]->cx + (player->facesLeft ? -1 : 1), (float) entities[0]->cy}, {C::GRID_SIZE, C::GRID_SIZE}, player->facesLeft)); 
 }
 
 bool Game::hasCollisions(const float posX, const float posY)

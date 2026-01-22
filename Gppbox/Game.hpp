@@ -42,6 +42,9 @@ public:
 
 	Player* player;
 	std::vector<Entity*>			entities;
+	float playerShootRatePerSeconds{ 4 };
+	bool canPlayerShoot{ true };
+	float lastShotDT{ 0.0f };
 
 	ParticleMan beforeParts;
 	ParticleMan afterParts;

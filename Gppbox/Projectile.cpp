@@ -1,8 +1,9 @@
 #include "Projectile.hpp"
 
-Projectile::Projectile(sf::Vector2f position, sf::Vector2f size) :
+Projectile::Projectile(sf::Vector2f position, sf::Vector2f size, bool left) :
 	Entity(position, size)
 {
+	facesLeft = left;
 	has_gravity = false;
 	sprite = new sf::RectangleShape({size.x, size.y});
 	sprite->setOrigin({size.x * 0.5f,  size.y});
@@ -18,10 +19,9 @@ std::string Projectile::get_type_name() const
 
 void Projectile::update(double deltaTime)
 {
-	dx += SPEED * 2;
+	dx += 2 * (facesLeft ? -SPEED : SPEED);
 	Entity::update(deltaTime);
-	if (abs(cx - initialCx) > 20);
-		//delete projectile! how!;
+	if (abs(cx - initialCx) > 20) printf("delete");
 }
 
 bool Projectile::check_bottom_collision()
