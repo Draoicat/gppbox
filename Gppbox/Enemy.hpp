@@ -15,6 +15,8 @@ public:
 
 	void update(double deltaTime) override;
 
+	void die();
+
 protected:
 	bool check_left_collision() override;
 	bool check_right_collision() override;

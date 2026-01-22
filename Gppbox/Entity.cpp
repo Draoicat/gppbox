@@ -5,6 +5,7 @@
 #include "Game.hpp"
 
 int Entity::entityCount = 0;
+int Entity::totalEntityCount = 0;
 
 Entity::Entity(sf::Vector2f position, sf::Vector2f size)
 {
@@ -15,6 +16,12 @@ Entity::Entity(sf::Vector2f position, sf::Vector2f size)
 }
 
 Entity::Entity() : Entity({0.0, 0.0}, {1.0f, 1.0f}) { }
+
+Entity::~Entity()
+{
+	--entityCount;
+	delete sprite;
+}
 
 bool Entity::check_left_collision()
 {
@@ -172,7 +179,7 @@ void Entity::im_gui()
 
 		ImGui::Value("facesLeft", facesLeft);
 
-		ImGui::Value("shouldDelete", shouldDelete);
+		//ImGui::Value("shouldDelete", shouldDelete);
 
 		ImGui::TreePop();
 	}

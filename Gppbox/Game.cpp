@@ -7,6 +7,7 @@
 #include "Enemy.hpp"
 #include "HotReloadShader.hpp"
 #include "Player.hpp"
+#include "Projectile.hpp"
 
 Game* Game::instance = 0;
 static int cols = C::RES_X / C::GRID_SIZE;
@@ -28,7 +29,7 @@ Game::Game(sf::RenderWindow * win) {
 	bgShader = new HotReloadShader("res/bg.vert", "res/bg.frag");
 	
 	for (int i = 0; i < C::RES_X / C::GRID_SIZE; ++i) 
-		walls.push_back(Vector2i(i, lastLine) );
+		walls.emplace_back(i, lastLine);
 	
 	cacheWalls();
 
@@ -38,11 +39,11 @@ Game::Game(sf::RenderWindow * win) {
 	playerSprite.setOutlineColor(sf::Color::Black);
 	
 	player = new Player({ 3, 50 }, { C::GRID_SIZE, C::GRID_SIZE * 2 });
-	entities.emplace_back(player);
+	entities.push_back(player);
 
-	//entities
+	// enemy creation
 	for (int i = 0; i < enemyCount; ++i)
-		entities.emplace_back(new Enemy({80, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
+		entities.push_back(new Enemy({80, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
 }
 
 void Game::cacheWalls()
@@ -128,17 +129,20 @@ void Game::update(double dt)
 
 	for (Entity* e : entities)
 	{
-		e->update(dt);
 		if (e->shouldDelete)
+		{
+			printf(("Deleting Entity : " + (e->get_type_name() + " " + to_string(e->id)) + '\n').c_str());
 			entities.erase(std::remove(entities.begin(), entities.end(), e), entities.end());
+		}
+		e->update(dt);
 	}
 
 	//checkwin
-	for (int i = 1; i <= enemyCount; ++i)
+	/*for (int i = 1; i <= enemyCount; ++i)
 	{
 		if (entities[0]->cx == entities[i]->cx && entities[0]->cy == entities[i]->cy)
 			gameOver();
-	}
+	}*/
 
 	if (bgShader) bgShader->update(dt);
 
@@ -200,7 +204,7 @@ void Game::shoot()
 {
 	if (!canPlayerShoot) return;
 	canPlayerShoot = false;
-	entities.emplace_back(new Projectile({(float) entities[0]->cx + (player->facesLeft ? -1 : 1), (float) entities[0]->cy}, {C::GRID_SIZE, C::GRID_SIZE}, player->facesLeft)); 
+	entities.push_back(new Projectile({(float) entities[0]->cx + (player->facesLeft ? -1 : 1), (float) entities[0]->cy}, {C::GRID_SIZE, C::GRID_SIZE}, player->facesLeft));
 }
 
 bool Game::hasCollisions(const float posX, const float posY)
@@ -213,14 +217,22 @@ bool Game::hasCollisions(const float posX, const float posY)
 	return isWall(static_cast<int>(posX), static_cast<int>(posY));
 }
 
+Entity* Game::isEntityPresent(string typeName, int x, int y)
+{
+	for (Entity* e : entities)
+		if (e->cx == x && e->cy == y && typeName == e->get_type_name())
+			return e;
+	return nullptr;
+}
+
 void Game::gameOver()
 {
-	//entities.erase(std::remove(entities.begin(), entities.end(), entities[0]), entities.end());
 	isGameOver = true;
 }
 
 void Game::imGui(sf::RenderWindow& win)
 {
+	ImGui::Value("Can player shoot", canPlayerShoot);
 	// level editor button
 	if (ImGui::Button("Level Editor"))
 	{

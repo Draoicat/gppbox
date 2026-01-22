@@ -8,9 +8,10 @@ class Entity
 public:
 	virtual std::string get_type_name() const = 0;
 
-	bool shouldDelete{false};
+	bool shouldDelete{ false };
 	sf::Shape* sprite;
 
+	static int totalEntityCount;
 	static int entityCount;
 	int id{ 0 };
 
@@ -41,7 +42,7 @@ public:
 	// Constructors & Destructors
 	Entity(sf::Vector2f position, sf::Vector2f size);
 	Entity();
-	virtual ~Entity() = default;
+	virtual ~Entity();
 
 	// Game Loop
 	virtual void update(double deltaTime);

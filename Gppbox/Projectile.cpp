@@ -1,5 +1,7 @@
 #include "Projectile.hpp"
 
+#include "Game.hpp"
+
 Projectile::Projectile(sf::Vector2f position, sf::Vector2f size, bool left) :
 	Entity(position, size)
 {
@@ -41,3 +43,4 @@ bool Projectile::check_bottom_collision()
 {
 	return false;
 }
+

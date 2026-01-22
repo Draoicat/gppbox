@@ -3,19 +3,15 @@
 #include <vector>
 
 #include "SFML/Graphics.hpp"
-#include "SFML/System.hpp"
 #include "SFML/Window.hpp"
 
 #include "sys.hpp"
 #include "Entity.hpp"
 
-#include "Particle.hpp"
 #include "ParticleMan.hpp"
 
 #include "C.hpp"
-#include "Enemy.hpp"
 #include "Player.hpp"
-#include "Projectile.hpp"
 
 enum EditorMode 
 {
@@ -42,6 +38,7 @@ public:
 
 	Player* player;
 	std::vector<Entity*>			entities;
+
 	float playerShootRatePerSeconds{ 4 };
 	bool canPlayerShoot{ true };
 	float lastShotDT{ 0.0f };
@@ -59,13 +56,14 @@ public:
 
 	void cacheWalls();
 
-	void processInput(sf::Event ev);
 	bool wasPressed = false;
+	void processInput(sf::Event ev);
 	void pollInput(double dt);
 	void onSpacePressed();
 
 	void update(double dt);
 	bool hasCollisions(float posX, float posY);
+	Entity* isEntityPresent(string typeName, int x, int y);
 
 	void draw(sf::RenderWindow& win);
 

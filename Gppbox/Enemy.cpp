@@ -20,6 +20,11 @@ void Enemy::update(double deltaTime)
 	Entity::update(deltaTime);
 }
 
+void Enemy::die()
+{
+	shouldDelete = true;
+}
+
 bool Enemy::check_left_collision()
 {
 	bool const result = Entity::check_left_collision();
