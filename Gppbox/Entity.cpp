@@ -172,6 +172,8 @@ void Entity::im_gui()
 
 		ImGui::Value("facesLeft", facesLeft);
 
+		ImGui::Value("shouldDelete", shouldDelete);
+
 		ImGui::TreePop();
 	}
 }

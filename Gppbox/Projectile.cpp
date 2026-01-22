@@ -21,7 +21,20 @@ void Projectile::update(double deltaTime)
 {
 	dx += 2 * (facesLeft ? -SPEED : SPEED);
 	Entity::update(deltaTime);
-	if (abs(cx - initialCx) > 20) printf("delete");
+	if (shouldDelete) return;
+	shouldDelete = abs(cx - initialCx) > MAX_DISTANCE;
+}
+
+bool Projectile::check_right_collision()
+{
+	if (Entity::check_right_collision()) shouldDelete = true;
+	return shouldDelete;
+}
+
+bool Projectile::check_left_collision()
+{
+	if (Entity::check_left_collision()) shouldDelete = true;
+	return shouldDelete;
 }
 
 bool Projectile::check_bottom_collision()

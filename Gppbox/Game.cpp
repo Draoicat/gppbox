@@ -129,7 +129,8 @@ void Game::update(double dt)
 	for (Entity* e : entities)
 	{
 		e->update(dt);
-
+		if (e->shouldDelete)
+			entities.erase(std::remove(entities.begin(), entities.end(), e), entities.end());
 	}
 
 	//checkwin
@@ -204,7 +205,7 @@ void Game::shoot()
 
 bool Game::hasCollisions(const float posX, const float posY)
 {
-	if (posX < 1.5f) return true;
+	if (posX < 1.0f) return true;
 
 	int wallRightX = (C::RES_X / C::GRID_SIZE) - 1;
 	if (posX >= wallRightX) return true;

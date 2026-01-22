@@ -8,6 +8,7 @@ class Entity
 public:
 	virtual std::string get_type_name() const = 0;
 
+	bool shouldDelete{false};
 	sf::Shape* sprite;
 
 	static int entityCount;
