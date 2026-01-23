@@ -1,5 +1,7 @@
 #include "Enemy.hpp"
 
+#include "Game.hpp"
+
 Enemy::Enemy(sf::Vector2f position, sf::Vector2f size) :
 	Entity(position, size)
 {
@@ -20,13 +22,21 @@ void Enemy::update(double deltaTime)
 	Entity::update(deltaTime);
 }
 
-void Enemy::die()
+bool Enemy::die(Entity* projectile)
 {
+	if (projectile == nullptr) return false;
 	shouldDelete = true;
+	projectile->shouldDelete = true;
+	return true;
 }
 
 bool Enemy::check_left_collision()
 {
+	for (int y = cy; y > cy - sy; --y)
+	{
+		Entity* projectile = Game::instance->isOtherEntityPresent("Projectile", cx - 1, y);
+		if (die(projectile)) return true;
+	}
 	bool const result = Entity::check_left_collision();
 	if (result) goLeft = false;
 	return result;
@@ -34,7 +44,17 @@ bool Enemy::check_left_collision()
 
 bool Enemy::check_right_collision()
 {
+	for (int y = cy; y > cy - sy; --y)
+	{
+		Entity* projectile = (Game::instance->isOtherEntityPresent("Projectile", cx + 1, y));
+		if (die(projectile)) return true;
+	}
 	bool const result = Entity::check_right_collision();
 	if (result) goLeft = true;
 	return result;
+}
+
+Entity* Enemy::checkForEntities(int x, int y)
+{
+	return Game::instance->isOtherEntityPresent("Projectile", x, y);
 }

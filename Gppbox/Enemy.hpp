@@ -15,11 +15,13 @@ public:
 
 	void update(double deltaTime) override;
 
-	void die();
+	bool die(Entity* projectile);
 
 protected:
 	bool check_left_collision() override;
 	bool check_right_collision() override;
+
+	Entity* checkForEntities(int x, int y);
 
 };
 

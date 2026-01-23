@@ -63,7 +63,7 @@ public:
 
 	void update(double dt);
 	bool hasCollisions(float posX, float posY);
-	Entity* isEntityPresent(string typeName, int x, int y);
+	Entity* isOtherEntityPresent(string typeName, int x, int y);
 
 	void draw(sf::RenderWindow& win);
 

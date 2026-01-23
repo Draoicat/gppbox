@@ -217,7 +217,7 @@ bool Game::hasCollisions(const float posX, const float posY)
 	return isWall(static_cast<int>(posX), static_cast<int>(posY));
 }
 
-Entity* Game::isEntityPresent(string typeName, int x, int y)
+Entity* Game::isOtherEntityPresent(string typeName, int x, int y)
 {
 	for (Entity* e : entities)
 		if (e->cx == x && e->cy == y && typeName == e->get_type_name())
