@@ -43,4 +43,3 @@ bool Projectile::check_bottom_collision()
 {
 	return false;
 }
-

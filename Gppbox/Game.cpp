@@ -124,8 +124,13 @@ int blendModeIndex(sf::BlendMode bm) {
 void Game::update(double dt)
 {
 	if (isLevelEditorOn) return;
-
 	g_time += dt;
+
+	if (lastShotDeltaTime < (1 / playerShootRatePerSeconds))
+		lastShotDeltaTime += dt;
+	else
+		canPlayerShoot = true;
+	
 
 	for (Entity* e : entities)
 	{
@@ -149,13 +154,6 @@ void Game::update(double dt)
 	beforeParts.update(dt);
 	afterParts.update(dt);
 	
-	// INPUTS
-	if (lastShotDT < 1 / playerShootRatePerSeconds) lastShotDT += dt;
-	else
-	{
-		lastShotDT = 0.0f;
-		canPlayerShoot = true;
-	}
 	pollInput(dt);
 
 }
@@ -203,8 +201,9 @@ bool Game::isWall(int cx, int cy)
 void Game::shoot()
 {
 	if (!canPlayerShoot) return;
+	lastShotDeltaTime = 0.0f;
 	canPlayerShoot = false;
-	entities.push_back(new Projectile({(float) entities[0]->cx + (player->facesLeft ? -1 : 1), (float) entities[0]->cy}, {C::GRID_SIZE, C::GRID_SIZE}, player->facesLeft));
+	entities.push_back(new Projectile({(float) entities[0]->cx + (player->facesLeft ? -2 : 2), (float) entities[0]->cy}, {C::GRID_SIZE, C::GRID_SIZE}, player->facesLeft));
 }
 
 bool Game::hasCollisions(const float posX, const float posY)
