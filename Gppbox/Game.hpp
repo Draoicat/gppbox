@@ -50,8 +50,6 @@ public:
 	EditorMode levelEditorMode{ WALL };
 	bool placeWallMode{ true };
 
-	int enemyCount{ C::ENEMY_COUNT };
-
 	Game(sf::RenderWindow * win);
 
 	void cacheWalls();
@@ -69,14 +67,21 @@ public:
 
 	bool isWall(int cx, int cy);
 	void imGui(sf::RenderWindow& win);
-	void addWall(float const x, float const y);
-	void removeWall(float const x, float const y);
-	void addEnemy(float const x, float const y);
 
+	void loadPlayer(float const x, float const y);
+	void tryAddWall(float const x, float const y);
+	void addWall(int const x, int const y);
+	void tryRemoveWall(float const x, float const y);
+	void removeWall(Vector2i const& wall);
+	void tryAddEnemy(float const x, float const y);
+	void addEnemy(float const x, float const y);
+	void removeEnemy(Entity* enemy);
 
 	void shoot();
 	bool isGameOver{ false };
 	void gameOver();
 
-	//Sprites
+	void save();
+	void load();
+
 };

@@ -8,6 +8,7 @@
 #include "HotReloadShader.hpp"
 #include "Player.hpp"
 #include "Projectile.hpp"
+#include "SaveSystem.h"
 
 Game* Game::instance = 0;
 static int cols = C::RES_X / C::GRID_SIZE;
@@ -28,8 +29,8 @@ Game::Game(sf::RenderWindow * win) {
 
 	bgShader = new HotReloadShader("res/bg.vert", "res/bg.frag");
 	
-	for (int i = 0; i < C::RES_X / C::GRID_SIZE; ++i) 
-		walls.emplace_back(i, lastLine);
+	for (int i = 0; i < C::RES_X / C::GRID_SIZE; ++i)
+		addWall(i, lastLine);
 	
 	cacheWalls();
 
@@ -38,12 +39,10 @@ Game::Game(sf::RenderWindow * win) {
 	playerSprite.setFillColor( sf::Color::White );
 	playerSprite.setOutlineColor(sf::Color::Black);
 	
-	player = new Player({ 3, 50 }, { C::GRID_SIZE, C::GRID_SIZE * 2 });
-	entities.push_back(player);
+	loadPlayer(3, 50);
 
 	// enemy creation
-	for (int i = 0; i < enemyCount; ++i)
-		entities.push_back(new Enemy({80, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
+	entities.push_back(new Enemy({80, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
 }
 
 void Game::cacheWalls()
@@ -85,7 +84,6 @@ void Game::pollInput(double dt) {
 	float maxSpeed = 40.0;
 
 	float x = sf::Joystick::getAxisPosition(0, sf::Joystick::Axis::X);
-	printf("%f\n", x);
 	bool jumpButton = (sf::Joystick::isButtonPressed(0, 0));
 	bool shootButton = sf::Joystick::isButtonPressed(0,1);
 
@@ -216,6 +214,19 @@ void Game::gameOver()
 	isGameOver = true;
 }
 
+void Game::save()
+{
+	SaveSystem::save_level(*this);
+}
+
+void Game::load()
+{	
+
+	SaveSystem::load_level(*this);
+	Entity::entityCount = 0;
+	Entity::totalEntityCount = 0;
+}
+
 void Game::imGui(sf::RenderWindow& win)
 {
 	ImGui::Value("Can player shoot", canPlayerShoot);
@@ -270,7 +281,7 @@ void Game::imGui(sf::RenderWindow& win)
 			switch (levelEditorMode)
 			{
 			case ENEMY:
-				addEnemy(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE);
+				tryAddEnemy(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE);
 				break;
 			default:
 				break;
@@ -284,9 +295,9 @@ void Game::imGui(sf::RenderWindow& win)
 			{
 			case WALL:
 				if (!placeWallMode)
-					addWall(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE);
+					tryAddWall(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE);
 				else
-					removeWall(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE);
+					tryRemoveWall(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE);
 				break;
 			default:
 				break;
@@ -303,6 +314,15 @@ void Game::imGui(sf::RenderWindow& win)
 		levelEditorMode = (EditorMode) levelEditorModeInt;
 	}
 
+	if (ImGui::Button("Save level"))
+	{
+		save();
+	}
+	if (ImGui::Button("Load saved level"))
+	{
+		load();
+	}
+
 	if (ImGui::CollapsingHeader("Entities", ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		for (Entity* e : entities) 
@@ -310,34 +330,49 @@ void Game::imGui(sf::RenderWindow& win)
 	}
 }
 
-void Game::addEnemy(float const x, float const y)
+void Game::loadPlayer(float const x, float const y)
+{
+	if (player != nullptr) return;
+	player = new Player({ x, y }, { C::GRID_SIZE, C::GRID_SIZE * 2 });
+	entities.push_back(player);
+}
+
+void Game::tryAddEnemy(float const x, float const y)
 {
 	for (Entity* e : entities)
 		if (e->cx == (int) x && e->cy == (int) y) 
 			return;
-	//printf("Putting Enemy at : (%f, %f)\n", x, y);
-	entities.emplace_back(new Enemy({x, y}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
-	++enemyCount;
-	cacheWalls();
+	addEnemy(x, y);
 }
- 
-void Game::addWall(float const x, float const y)
+
+void Game::addEnemy(float const x, float const y)
+{
+	entities.push_back(new Enemy({x, y}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
+}
+
+void Game::tryAddWall(float const x, float const y)
 {
 	for (Vector2i& wall : walls)
 		if (wall.x == (int) x && wall.y == (int) y) //don't place two walls at the same spot 
 			return;
-	//printf("Putting Wall at : (%f, %f)\n", x, y);
-	walls.push_back(Vector2i(x, y));
+	addWall(x, y);
+}
+
+void Game::addWall(int const x, int const y)
+{
+	walls.emplace_back(x, y);
 	cacheWalls();
 }
 
-void Game::removeWall(float const x, float const y)
+void Game::tryRemoveWall(float const x, float const y)
 {
 	for (Vector2i& wall : walls)
 		if (wall.x == (int) x && wall.y == (int) y) //don't remove a wall that doesn't exist
-		{
-			//printf("Removing Wall at : (%f, %f)\n", x, y);
-			walls.erase(std::remove(walls.begin(), walls.end(), wall), walls.end());
-		}
+			removeWall(wall);
+}
+
+void Game::removeWall(Vector2i const& wall)
+{
+	walls.erase(std::remove(walls.begin(), walls.end(), wall), walls.end());
 	cacheWalls();
 }
