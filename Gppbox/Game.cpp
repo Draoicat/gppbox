@@ -84,19 +84,24 @@ void Game::pollInput(double dt) {
 	float lateralSpeed = 8.0;
 	float maxSpeed = 40.0;
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q)) {
+	float x = sf::Joystick::getAxisPosition(0, sf::Joystick::Axis::X);
+	printf("%f\n", x);
+	bool jumpButton = (sf::Joystick::isButtonPressed(0, 0));
+	bool shootButton = sf::Joystick::isButtonPressed(0,1);
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q) || x < -50) {
 		player->go_left();
 	}
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || x > 50) {
 		player->go_right();
 	}
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Tab)) {
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Tab) || shootButton) {
 		shoot();
 	}
 	
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || jumpButton) {
 		if (!wasPressed) { // started
 			onSpacePressed();
 			wasPressed = true;

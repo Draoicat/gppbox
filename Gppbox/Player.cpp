@@ -24,11 +24,6 @@ void Player::stop_jump()
 	dy = 0;
 }
 
-std::string Player::get_type_name() const
-{
-	return "Player";
-}
-
 void Player::calculateNextPosition(double deltaTime)
 {
 	Entity::calculateNextPosition(deltaTime);

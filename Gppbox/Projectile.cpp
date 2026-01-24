@@ -14,11 +14,6 @@ Projectile::Projectile(sf::Vector2f position, sf::Vector2f size, bool left) :
 	initialCx = cx;
 }
 
-std::string Projectile::get_type_name() const
-{
-	return "Projectile";
-}
- 
 void Projectile::update(double deltaTime)
 {
 	dx += 2 * (facesLeft ? -SPEED : SPEED);

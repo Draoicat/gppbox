@@ -11,11 +11,6 @@ Enemy::Enemy(sf::Vector2f position, sf::Vector2f size) :
 	set_grid_coordinates(position.x, position.y);
 }
 
-std::string Enemy::get_type_name() const
-{
-	return "Enemy";
-}
-
 void Enemy::update(double deltaTime)
 {
 	facesLeft ? go_left() : go_right();
@@ -62,7 +57,7 @@ Entity* Enemy::checkForEntities(int x, int y)
 void Enemy::go_left()
 {
 	Entity::go_left();
-	dx += SPEED /2;
+	dx += SPEED / 2;
 }
 
 void Enemy::go_right()

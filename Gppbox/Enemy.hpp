@@ -11,7 +11,7 @@ public:
 
 	Enemy(sf::Vector2f position, sf::Vector2f size);
 
-	std::string get_type_name() const override;
+	std::string get_type_name() const override { return "Enemy"; }
 
 	void update(double deltaTime) override;
 

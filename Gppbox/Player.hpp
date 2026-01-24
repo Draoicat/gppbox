@@ -15,7 +15,7 @@ public:
 	const float MIN_JUMP_FORCE{ 15.0f };
 	const float MAX_JUMP_FORCE{ 40.0f };
 
-	std::string get_type_name() const override;
+	std::string get_type_name() const override  { return "Player"; }
 
 	void im_gui() override;
 protected:
