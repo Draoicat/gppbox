@@ -28,16 +28,16 @@ void Player::stop_jump()
 void Player::go_left()
 {
 	Entity::go_left();
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Tab) ||
-		sf::Joystick::isButtonPressed(0,1))
+	if (Keyboard::isKeyPressed(Keyboard::Key::Tab) ||
+		Joystick::isButtonPressed(0,1))
 		dx += SPEED / 1.5f;
 }
 
 void Player::go_right()
 {
 	Entity::go_right();
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Tab) ||
-		sf::Joystick::isButtonPressed(0,1)) //ugly but i'll fix later maybe :3c
+	if (Keyboard::isKeyPressed(Keyboard::Key::Tab) ||
+		Joystick::isButtonPressed(0,1)) //ugly but i'll fix later maybe :3c
 		dx += -SPEED / 1.5f;
 }
 

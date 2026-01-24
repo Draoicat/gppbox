@@ -75,9 +75,10 @@ public:
 	void removeWall(Vector2i const& wall);
 	void tryAddEnemy(float const x, float const y);
 	void addEnemy(float const x, float const y);
-	void removeEnemy(Entity* enemy);
 
 	void shoot();
+	void death_ray();
+	std::vector<Vector2i> bresenham(Vector2i origin, Vector2i goal);
 	bool isGameOver{ false };
 	void gameOver();
 

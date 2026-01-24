@@ -191,6 +191,30 @@ void Game::shoot()
 	entities.push_back(new Projectile({(float) entities[0]->cx + (player->facesLeft ? -2 : 2), (float) entities[0]->cy}, {C::GRID_SIZE, C::GRID_SIZE}, player->facesLeft));
 }
 
+std::vector<Vector2i> Game::bresenham(Vector2i origin, Vector2i goal)
+{
+	std::vector<Vector2i> points;
+
+	int dx = goal.x - origin.x;
+	int dy = goal.y - origin.y;
+	int D = 2*dy - dx;
+	int y = origin.y;
+
+	for (int x = origin.x; x <= goal.x; ++x)
+	{
+		points.emplace_back(x, y);
+		if (D > 0)
+		{
+			y += 1;
+			D += 2 * (dy - dx);
+		}
+		else
+			D += 2*dy;
+	}
+
+	return points;
+}
+
 bool Game::hasCollisions(const float posX, const float posY)
 {
 	if (posX < 1.0f) return true;
