@@ -1,5 +1,6 @@
 #include "Player.hpp"
 
+#include "Game.hpp"
 #include "imgui.h"
 
 Player::Player(sf::Vector2f position, sf::Vector2f size) :
@@ -22,6 +23,22 @@ void Player::stop_jump()
 {
 	if (!is_jumping || check_bottom_collision()) return;
 	dy = 0;
+}
+
+void Player::go_left()
+{
+	Entity::go_left();
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Tab) ||
+		sf::Joystick::isButtonPressed(0,1))
+		dx += SPEED / 1.5f;
+}
+
+void Player::go_right()
+{
+	Entity::go_right();
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Tab) ||
+		sf::Joystick::isButtonPressed(0,1)) //ugly but i'll fix later maybe :3c
+		dx += -SPEED / 1.5f;
 }
 
 void Player::calculateNextPosition(double deltaTime)

@@ -18,6 +18,9 @@ public:
 	std::string get_type_name() const override  { return "Player"; }
 
 	void im_gui() override;
+
+	void go_left() override;
+	void go_right() override;
 protected:
 
 	void calculateNextPosition(double deltaTime) override;

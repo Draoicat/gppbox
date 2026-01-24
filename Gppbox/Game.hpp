@@ -39,7 +39,7 @@ public:
 	Player* player;
 	std::vector<Entity*>			entities;
 
-	double playerShootRatePerSeconds{ 4 };
+	double playerShootRatePerSeconds{8};
 	bool canPlayerShoot{ true };
 	double lastShotDeltaTime{ 0.0f };
 
