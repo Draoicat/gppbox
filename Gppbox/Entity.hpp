@@ -31,6 +31,10 @@ public:
 	float dx{ 0.0f };
 	float dy{ 0.0f };
 	bool facesLeft{ false };
+	bool isKnockback{ false };
+
+	virtual void go_left();
+	virtual void go_right();
 
 	// Gravity
 	float static constexpr GRAVITY_RATE{ 100.0f };
@@ -56,6 +60,7 @@ protected:
 	void set_pixel_coordinates(int px, int py);
 	void set_grid_coordinates(float xCoordinates, float yCoordinates);
 
+	void knockback();
 	void synchronise_position();
 
 	// Collisions

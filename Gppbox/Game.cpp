@@ -85,11 +85,11 @@ void Game::pollInput(double dt) {
 	float maxSpeed = 40.0;
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q)) {
-		player->dx -= Entity::SPEED;
+		player->go_left();
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
-		player->dx += Entity::SPEED;
+		player->go_right();
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Tab)) {
@@ -126,28 +126,15 @@ void Game::update(double dt)
 	if (isLevelEditorOn) return;
 	g_time += dt;
 
-	if (lastShotDeltaTime < (1 / playerShootRatePerSeconds))
-		lastShotDeltaTime += dt;
-	else
-		canPlayerShoot = true;
+	if (lastShotDeltaTime < (1 / playerShootRatePerSeconds)) lastShotDeltaTime += dt;
+	else canPlayerShoot = true;
 	
-
 	for (Entity* e : entities)
 	{
 		if (e->shouldDelete)
-		{
-			printf(("Deleting Entity : " + (e->get_type_name() + " " + to_string(e->id)) + '\n').c_str());
 			entities.erase(std::remove(entities.begin(), entities.end(), e), entities.end());
-		}
 		e->update(dt);
 	}
-
-	//checkwin
-	/*for (int i = 1; i <= enemyCount; ++i)
-	{
-		if (entities[0]->cx == entities[i]->cx && entities[0]->cy == entities[i]->cy)
-			gameOver();
-	}*/
 
 	if (bgShader) bgShader->update(dt);
 
@@ -155,7 +142,6 @@ void Game::update(double dt)
 	afterParts.update(dt);
 	
 	pollInput(dt);
-
 }
 
  void Game::draw(sf::RenderWindow & win) {
@@ -172,14 +158,9 @@ void Game::update(double dt)
 
 	beforeParts.draw(win);
 
-	for (sf::RectangleShape & r : wallSprites)
-		win.draw(r);
-
-	for (sf::RectangleShape& r : rects) 
-		win.draw(r);
-
-	for (Entity* e : entities)
-		e->draw(win);
+	for (sf::RectangleShape & r : wallSprites) win.draw(r);
+	for (sf::RectangleShape& r : rects) win.draw(r);
+	for (Entity* e : entities) e->draw(win);
 
 	afterParts.draw(win);
 }
@@ -203,6 +184,7 @@ void Game::shoot()
 	if (!canPlayerShoot) return;
 	lastShotDeltaTime = 0.0f;
 	canPlayerShoot = false;
+	player->isKnockback = true;
 	entities.push_back(new Projectile({(float) entities[0]->cx + (player->facesLeft ? -2 : 2), (float) entities[0]->cy}, {C::GRID_SIZE, C::GRID_SIZE}, player->facesLeft));
 }
 
@@ -328,19 +310,18 @@ void Game::addEnemy(float const x, float const y)
 	for (Entity* e : entities)
 		if (e->cx == (int) x && e->cy == (int) y) 
 			return;
-	printf("Putting Enemy at : (%f, %f)\n", x, y);
+	//printf("Putting Enemy at : (%f, %f)\n", x, y);
 	entities.emplace_back(new Enemy({x, y}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
 	++enemyCount;
 	cacheWalls();
 }
-
-
+ 
 void Game::addWall(float const x, float const y)
 {
 	for (Vector2i& wall : walls)
 		if (wall.x == (int) x && wall.y == (int) y) //don't place two walls at the same spot 
 			return;
-	printf("Putting Wall at : (%f, %f)\n", x, y);
+	//printf("Putting Wall at : (%f, %f)\n", x, y);
 	walls.push_back(Vector2i(x, y));
 	cacheWalls();
 }
@@ -350,7 +331,7 @@ void Game::removeWall(float const x, float const y)
 	for (Vector2i& wall : walls)
 		if (wall.x == (int) x && wall.y == (int) y) //don't remove a wall that doesn't exist
 		{
-			printf("Removing Wall at : (%f, %f)\n", x, y);
+			//printf("Removing Wall at : (%f, %f)\n", x, y);
 			walls.erase(std::remove(walls.begin(), walls.end(), wall), walls.end());
 		}
 	cacheWalls();

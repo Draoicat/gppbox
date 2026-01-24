@@ -23,6 +23,9 @@ protected:
 
 	Entity* checkForEntities(int x, int y);
 
+public:
+	void go_left() override;
+	void go_right() override;
 };
 
 #endif

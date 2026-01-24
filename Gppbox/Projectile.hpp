@@ -16,6 +16,8 @@ public:
     bool check_right_collision() override;
     bool check_left_collision() override;
     bool check_bottom_collision() override;
+    void go_left() override;
+    void go_right() override;
 
     int initialCx;
 };

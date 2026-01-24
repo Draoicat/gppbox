@@ -18,7 +18,7 @@ std::string Enemy::get_type_name() const
 
 void Enemy::update(double deltaTime)
 {
-	dx += (goLeft) ? -SPEED / 2 : SPEED / 2;
+	facesLeft ? go_left() : go_right();
 	Entity::update(deltaTime);
 }
 
@@ -38,7 +38,7 @@ bool Enemy::check_left_collision()
 		if (die(projectile)) return true;
 	}
 	bool const result = Entity::check_left_collision();
-	if (result) goLeft = false;
+	if (result) facesLeft = false;
 	return result;
 }
 
@@ -50,11 +50,23 @@ bool Enemy::check_right_collision()
 		if (die(projectile)) return true;
 	}
 	bool const result = Entity::check_right_collision();
-	if (result) goLeft = true;
+	if (result) facesLeft = true;
 	return result;
 }
 
 Entity* Enemy::checkForEntities(int x, int y)
 {
 	return Game::instance->isOtherEntityPresent("Projectile", x, y);
+}
+
+void Enemy::go_left()
+{
+	Entity::go_left();
+	dx += SPEED /2;
+}
+
+void Enemy::go_right()
+{
+	Entity::go_right();
+	dx += -SPEED / 2;
 }

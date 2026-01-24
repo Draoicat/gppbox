@@ -7,6 +7,18 @@
 int Entity::entityCount = 0;
 int Entity::totalEntityCount = 0;
 
+void Entity::go_left()
+{
+	facesLeft = true;
+	dx += -SPEED;
+}
+
+void Entity::go_right()
+{
+	facesLeft = false;
+	dx += SPEED;
+}
+
 Entity::Entity(sf::Vector2f position, sf::Vector2f size)
 {
 	id = entityCount;
@@ -49,6 +61,12 @@ bool Entity::check_bottom_collision()
 bool Entity::check_top_collision()
 {
 	return Game::instance->hasCollisions(cx, cy - sy) && ry >= 0.98;
+}
+
+void Entity::knockback()
+{
+	if (!isKnockback) return;
+		dx += facesLeft ? SPEED*2 : -SPEED*2;
 }
 
 void Entity::calculateNextPosition(double deltaTime)
@@ -123,12 +141,16 @@ void Entity::handleCollisions()
 
 void Entity::update(double deltaTime)
 {
+	if (shouldDelete) return;
+
+	// Position calculation
+	if (isKnockback) knockback();
 	calculateNextPosition(deltaTime);
-	facesLeft = dx < 0;
 
 	handleCollisions();
 
 	synchronise_position();
+	isKnockback = false;
 }
 
 void Entity::draw(sf::RenderWindow& win)
@@ -178,6 +200,7 @@ void Entity::im_gui()
 		ImGui::Value("dy", dy);
 
 		ImGui::Value("facesLeft", facesLeft);
+		ImGui::Value("isKnockback", isKnockback);
 
 		//ImGui::Value("shouldDelete", shouldDelete);
 

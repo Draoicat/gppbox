@@ -18,7 +18,7 @@ std::string Projectile::get_type_name() const
 {
 	return "Projectile";
 }
-
+ 
 void Projectile::update(double deltaTime)
 {
 	dx += 2 * (facesLeft ? -SPEED : SPEED);
@@ -29,17 +29,31 @@ void Projectile::update(double deltaTime)
 
 bool Projectile::check_right_collision()
 {
-	if (Entity::check_right_collision()) shouldDelete = true;
+	if (Entity::check_right_collision()) 
+		shouldDelete = true;
 	return shouldDelete;
 }
 
 bool Projectile::check_left_collision()
 {
-	if (Entity::check_left_collision()) shouldDelete = true;
+	if (Entity::check_left_collision()) 
+		shouldDelete = true;
 	return shouldDelete;
 }
 
 bool Projectile::check_bottom_collision()
 {
 	return false;
+}
+
+void Projectile::go_left()
+{
+	Entity::go_left();
+	dx += -SPEED;
+}
+
+void Projectile::go_right()
+{
+	Entity::go_right();
+	dx += SPEED;
 }
