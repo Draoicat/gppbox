@@ -14,18 +14,18 @@ Game* Game::instance = 0;
 static int cols = C::RES_X / C::GRID_SIZE;
 static int lastLine = C::RES_Y / C::GRID_SIZE - 1;
 
-Game::Game(sf::RenderWindow * win) {
+Game::Game(RenderWindow * win) {
 	instance = this;
 
 	this->win = win;
-	bg = sf::RectangleShape(Vector2f((float)win->getSize().x, (float)win->getSize().y));
+	bg = RectangleShape(Vector2f((float)win->getSize().x, (float)win->getSize().y));
 
 	bool isOk = tex.loadFromFile("res/bg_stars.png");
 	if (!isOk) {
 		printf("ERR : LOAD FAILED\n");
 	}
 	bg.setTexture(&tex);
-	bg.setSize(sf::Vector2f(C::RES_X, C::RES_Y));
+	bg.setSize(Vector2f(C::RES_X, C::RES_Y));
 
 	bgShader = new HotReloadShader("res/bg.vert", "res/bg.frag");
 	
@@ -35,9 +35,9 @@ Game::Game(sf::RenderWindow * win) {
 	cacheWalls();
 
 	//player
-	sf::RectangleShape playerSprite({C::GRID_SIZE, C::GRID_SIZE * 2});
-	playerSprite.setFillColor( sf::Color::White );
-	playerSprite.setOutlineColor(sf::Color::Black);
+	RectangleShape playerSprite({C::GRID_SIZE, C::GRID_SIZE * 2});
+	playerSprite.setFillColor( Color::White );
+	playerSprite.setOutlineColor(Color::Black);
 	
 	loadPlayer(3, 50);
 
@@ -49,20 +49,20 @@ void Game::cacheWalls()
 {
 	wallSprites.clear();
 	for (Vector2i & w : walls) {
-		sf::RectangleShape rect(Vector2f(16,16));
+		RectangleShape rect(Vector2f(16,16));
 		rect.setPosition((float)w.x * C::GRID_SIZE, (float)w.y * C::GRID_SIZE);
-		rect.setFillColor(sf::Color(0x07ff07ff));
+		rect.setFillColor(Color(0x07ff07ff));
 		wallSprites.push_back(rect);
 	}
 }
 
-void Game::processInput(sf::Event ev) {
-	if (ev.type == sf::Event::Closed) {
+void Game::processInput(Event ev) {
+	if (ev.type == Event::Closed) {
 		win->close();
 		closing = true;
 		return;
 	}
-	if (ev.type == sf::Event::KeyReleased) {
+	if (ev.type == Event::KeyReleased) {
 		int here = 0;
 		if (ev.key.code == Keyboard::K) {
 			int there = 0;
@@ -80,26 +80,29 @@ float jump_time = 0.0f;
 void Game::pollInput(double dt) {
 	if (isGameOver) return;
 
-	float lateralSpeed = 8.0;
-	float maxSpeed = 40.0;
+	float x = Joystick::getAxisPosition(0, Joystick::Axis::X);
+	bool jumpButton = (Joystick::isButtonPressed(0, 0));
+	bool shootButton = Joystick::isButtonPressed(0,1);
+	bool rayButton = Joystick::isButtonPressed(0,2);
 
-	float x = sf::Joystick::getAxisPosition(0, sf::Joystick::Axis::X);
-	bool jumpButton = (sf::Joystick::isButtonPressed(0, 0));
-	bool shootButton = sf::Joystick::isButtonPressed(0,1);
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q) || x < -50) {
+	if (Keyboard::isKeyPressed(Keyboard::Key::Q) || x < -50) {
+		if (deathRaySprite) return;
 		player->go_left();
 	}
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || x > 50) {
+	if (Keyboard::isKeyPressed(Keyboard::Key::D) || x > 50) {
+		if (deathRaySprite) return;
 		player->go_right();
 	}
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Tab) || shootButton) {
+	if (Keyboard::isKeyPressed(Keyboard::Key::Tab) || shootButton) {
+		if (deathRaySprite) return;
 		shoot();
 	}
-	
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || jumpButton) {
+	if (Keyboard::isKeyPressed(Keyboard::Key::A) || rayButton) {
+		if (deathRaySprite) return;
+		death_ray();
+	}
+	if (Keyboard::isKeyPressed(Keyboard::Key::Space) || jumpButton) {
+		if (deathRaySprite) return;
 		if (!wasPressed) { // started
 			onSpacePressed();
 			wasPressed = true;
@@ -112,17 +115,18 @@ void Game::pollInput(double dt) {
 	}
 }
 
-static sf::VertexArray va;
+static VertexArray va;
 static RenderStates vaRs;
-static std::vector<sf::RectangleShape> rects;
+static std::vector<RectangleShape> rects;
 
-int blendModeIndex(sf::BlendMode bm) {
-	if (bm == sf::BlendAlpha) return 0;
-	if (bm == sf::BlendAdd) return 1;
-	if (bm == sf::BlendNone) return 2;
-	if (bm == sf::BlendMultiply) return 3;
+int blendModeIndex(BlendMode bm) {
+
+	if (bm == BlendAlpha) return 0;
+	if (bm == BlendAdd) return 1;
+	if (bm == BlendNone) return 2;
+	if (bm == BlendMultiply) return 3;
 	return 4;
-};
+}
 
 void Game::update(double dt)
 {
@@ -131,6 +135,9 @@ void Game::update(double dt)
 
 	if (lastShotDeltaTime < (1 / playerShootRatePerSeconds)) lastShotDeltaTime += dt;
 	else canPlayerShoot = true;
+
+	if (g_time - lastDeathRayTime > DEATH_RAY_TIME_ON_SCREEN_SECONDS)
+		deathRaySprite = nullptr;
 	
 	for (Entity* e : entities)
 	{
@@ -147,12 +154,12 @@ void Game::update(double dt)
 	pollInput(dt);
 }
 
- void Game::draw(sf::RenderWindow & win) {
+ void Game::draw(RenderWindow & win) {
 	if (closing) return;
 
-	sf::RenderStates states = sf::RenderStates::Default;
-	sf::Shader * sh = &bgShader->sh;
-	states.blendMode = sf::BlendAdd;
+	RenderStates states = RenderStates::Default;
+	Shader * sh = &bgShader->sh;
+	states.blendMode = BlendAdd;
 	states.shader = sh;
 	states.texture = &tex;
 	sh->setUniform("texture", tex);
@@ -161,9 +168,10 @@ void Game::update(double dt)
 
 	beforeParts.draw(win);
 
-	for (sf::RectangleShape & r : wallSprites) win.draw(r);
-	for (sf::RectangleShape& r : rects) win.draw(r);
+	for (RectangleShape & r : wallSprites) win.draw(r);
+	for (RectangleShape& r : rects) win.draw(r);
 	for (Entity* e : entities) e->draw(win);
+	if (deathRaySprite != nullptr) win.draw(*deathRaySprite);
 
 	afterParts.draw(win);
 }
@@ -188,7 +196,34 @@ void Game::shoot()
 	lastShotDeltaTime = 0.0f;
 	canPlayerShoot = false;
 	player->isKnockback = true;
-	entities.push_back(new Projectile({(float) entities[0]->cx + (player->facesLeft ? -2 : 2), (float) entities[0]->cy}, {C::GRID_SIZE, C::GRID_SIZE}, player->facesLeft));
+	entities.emplace_back(new Projectile({(float) entities[0]->cx + (player->facesLeft ? -2 : 2), (float) entities[0]->cy + 0.5f }, {C::GRID_SIZE, C::GRID_SIZE}, player->facesLeft));
+}
+
+void Game::death_ray()
+{
+	lastDeathRayTime = g_time;
+	Vector2i goal { 
+		(player->facesLeft ? player->cx - Entity::DEATH_RAY_LENGTH : player->cx + Entity::DEATH_RAY_LENGTH),
+		player->cy
+	};
+	std::vector<Vector2i> points = bresenham({player->cx, player->cy}, goal);
+	
+
+	for (Vector2i const& point : points)
+	{
+		Entity* enemy = isOtherEntityPresent("Enemy", point.x, point.y);
+		if (enemy != nullptr) enemy->shouldDelete = true;
+	}
+
+	deathRaySprite = new RectangleShape(Vector2f(C::GRID_SIZE * Entity::DEATH_RAY_LENGTH, C::GRID_SIZE * 1));
+	deathRaySprite->setPosition(
+		(player->facesLeft ? 
+			C::GRID_SIZE * (goal.x) :
+			C::GRID_SIZE * (player->cx + 1)
+		),
+		C::GRID_SIZE *  (player->cy - 0.5)
+	);
+	deathRaySprite->setFillColor(Color(0xffffffff));
 }
 
 std::vector<Vector2i> Game::bresenham(Vector2i origin, Vector2i goal)
@@ -211,7 +246,6 @@ std::vector<Vector2i> Game::bresenham(Vector2i origin, Vector2i goal)
 		else
 			D += 2*dy;
 	}
-
 	return points;
 }
 
@@ -238,7 +272,7 @@ void Game::gameOver()
 	isGameOver = true;
 }
 
-void Game::save()
+void Game::save() const
 {
 	SaveSystem::save_level(*this);
 }
@@ -251,7 +285,7 @@ void Game::load()
 	Entity::totalEntityCount = 0;
 }
 
-void Game::imGui(sf::RenderWindow& win)
+void Game::imGui(RenderWindow& win)
 {
 	ImGui::Value("Can player shoot", canPlayerShoot);
 	// level editor button
@@ -277,18 +311,18 @@ void Game::imGui(sf::RenderWindow& win)
 			);
 		}
 
-		sf::RectangleShape fakeWall(Vector2f(C::GRID_SIZE, C::GRID_SIZE));
-		sf::RectangleShape fakeEnemy(Vector2f(C::GRID_SIZE, C::GRID_SIZE * 2));
+		RectangleShape fakeWall(Vector2f(C::GRID_SIZE, C::GRID_SIZE));
+		RectangleShape fakeEnemy(Vector2f(C::GRID_SIZE, C::GRID_SIZE * 2));
 		// Preview
 		switch (levelEditorMode)
 		{
 		case WALL:
 			fakeWall.setPosition((int) (ImGui::GetMousePos().x / C::GRID_SIZE) * C::GRID_SIZE, (int) (ImGui::GetMousePos().y / C::GRID_SIZE) * C::GRID_SIZE);
-			fakeWall.setFillColor(sf::Color(0x07ff0777));
+			fakeWall.setFillColor(Color(0x07ff0777));
 			win.draw(fakeWall);
 			break;
 		case ENEMY:
-			fakeEnemy.setFillColor(sf::Color::Red);
+			fakeEnemy.setFillColor(Color::Red);
 			fakeEnemy.setOrigin({ C::GRID_SIZE * 0.5f, C::GRID_SIZE * 2 });
 			fakeEnemy.setPosition((int) (ImGui::GetMousePos().x / C::GRID_SIZE) * C::GRID_SIZE, (int) (ImGui::GetMousePos().y / C::GRID_SIZE) * C::GRID_SIZE);
 			win.draw(fakeEnemy);
@@ -371,7 +405,7 @@ void Game::tryAddEnemy(float const x, float const y)
 
 void Game::addEnemy(float const x, float const y)
 {
-	entities.push_back(new Enemy({x, y}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
+	entities.emplace_back(new Enemy({x, y}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
 }
 
 void Game::tryAddWall(float const x, float const y)

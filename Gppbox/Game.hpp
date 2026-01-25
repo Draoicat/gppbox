@@ -24,17 +24,18 @@ class Game {
 public:
 	static Game* instance;
 
-	sf::RenderWindow*				win = nullptr;
+	RenderWindow*				win = nullptr;
 
-	sf::RectangleShape				bg;
+	RectangleShape				bg;
+	RectangleShape* deathRaySprite;
 	HotReloadShader *				bgShader = nullptr;
 
-	sf::Texture						tex;
+	Texture						tex;
 
 	bool							closing = false;
 	
-	std::vector<sf::Vector2i>		walls;
-	std::vector<sf::RectangleShape> wallSprites;
+	std::vector<Vector2i>		walls;
+	std::vector<RectangleShape> wallSprites;
 
 	Player* player;
 	std::vector<Entity*>			entities;
@@ -50,12 +51,10 @@ public:
 	EditorMode levelEditorMode{ WALL };
 	bool placeWallMode{ true };
 
-	Game(sf::RenderWindow * win);
-
-	void cacheWalls();
+	Game(RenderWindow * win);
 
 	bool wasPressed = false;
-	void processInput(sf::Event ev);
+	void processInput(Event ev);
 	void pollInput(double dt);
 	void onSpacePressed();
 
@@ -63,26 +62,30 @@ public:
 	bool hasCollisions(float posX, float posY);
 	Entity* isOtherEntityPresent(string typeName, int x, int y);
 
-	void draw(sf::RenderWindow& win);
+	void draw(RenderWindow& win);
 
 	bool isWall(int cx, int cy);
-	void imGui(sf::RenderWindow& win);
+	void imGui(RenderWindow& win);
 
+	// data manip
 	void loadPlayer(float const x, float const y);
 	void tryAddWall(float const x, float const y);
 	void addWall(int const x, int const y);
 	void tryRemoveWall(float const x, float const y);
 	void removeWall(Vector2i const& wall);
+	void cacheWalls();
 	void tryAddEnemy(float const x, float const y);
 	void addEnemy(float const x, float const y);
 
-	void shoot();
-	void death_ray();
-	std::vector<Vector2i> bresenham(Vector2i origin, Vector2i goal);
-	bool isGameOver{ false };
-	void gameOver();
-
-	void save();
+	void save() const;
 	void load();
 
+	//actions
+	void shoot();
+	void death_ray();
+	static std::vector<Vector2i> bresenham(Vector2i origin, Vector2i goal);
+	double const DEATH_RAY_TIME_ON_SCREEN_SECONDS{ 0.2 };
+	double lastDeathRayTime{ 0.0 };
+	bool isGameOver{ false };
+	void gameOver();
 };

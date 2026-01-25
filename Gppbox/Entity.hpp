@@ -42,6 +42,7 @@ public:
 
 	// Actions
 	float static constexpr SPEED{ 15.0f };
+	int static constexpr DEATH_RAY_LENGTH{ 100 };
 
 	// Constructors & Destructors
 	Entity(sf::Vector2f position, sf::Vector2f size);
