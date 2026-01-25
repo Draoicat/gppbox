@@ -29,8 +29,8 @@ bool Enemy::check_left_collision()
 {
 	for (int y = cy; y > cy - sy; --y)
 	{
-		Entity* projectile = Game::instance->isOtherEntityPresent("Projectile", cx - 1, y);
-		if (die(projectile)) return true;
+		std::vector<Entity*> projectiles = Game::instance->isOtherEntityPresent("Projectile", cx - 1, y);
+		if (!projectiles.empty() && die(projectiles.at(0))) return true;
 	}
 	bool const result = Entity::check_left_collision();
 	if (result) facesLeft = false;
@@ -41,8 +41,8 @@ bool Enemy::check_right_collision()
 {
 	for (int y = cy; y > cy - sy; --y)
 	{
-		Entity* projectile = (Game::instance->isOtherEntityPresent("Projectile", cx + 1, y));
-		if (die(projectile)) return true;
+		std::vector<Entity*> projectiles = (Game::instance->isOtherEntityPresent("Projectile", cx + 1, y));
+		if (!projectiles.empty() && die(projectiles.at(0))) return true;
 	}
 	bool const result = Entity::check_right_collision();
 	if (result) facesLeft = true;
@@ -51,7 +51,8 @@ bool Enemy::check_right_collision()
 
 Entity* Enemy::checkForEntities(int x, int y)
 {
-	return Game::instance->isOtherEntityPresent("Projectile", x, y);
+	//only one player in the gayme, so let's just return the first index
+	return Game::instance->isOtherEntityPresent("Player", x, y).at(0);
 }
 
 void Enemy::go_left()

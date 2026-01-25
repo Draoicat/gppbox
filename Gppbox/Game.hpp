@@ -60,7 +60,7 @@ public:
 
 	void update(double dt);
 	bool hasCollisions(float posX, float posY);
-	Entity* isOtherEntityPresent(string typeName, int x, int y);
+	std::vector<Entity*> isOtherEntityPresent(string typeName, int x, int y);
 
 	void draw(RenderWindow& win);
 

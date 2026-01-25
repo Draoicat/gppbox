@@ -201,20 +201,25 @@ void Game::shoot()
 
 void Game::death_ray()
 {
+	//logic
 	lastDeathRayTime = g_time;
 	Vector2i goal { 
 		(player->facesLeft ? player->cx - Entity::DEATH_RAY_LENGTH : player->cx + Entity::DEATH_RAY_LENGTH),
 		player->cy
 	};
 	std::vector<Vector2i> points = bresenham({player->cx, player->cy}, goal);
-	
-
+	std::vector<Vector2i> pointsUpOffset = bresenham({player->cx, player->cy + 1}, goal);
+	std::vector<Vector2i> pointsDownOffset = bresenham({player->cx, player->cy - 1}, goal);
+	points.insert( points.end(), pointsUpOffset.begin(), pointsUpOffset.end() );
+	points.insert( points.end(), pointsDownOffset.begin(), pointsDownOffset.end() );
 	for (Vector2i const& point : points)
 	{
-		Entity* enemy = isOtherEntityPresent("Enemy", point.x, point.y);
-		if (enemy != nullptr) enemy->shouldDelete = true;
+		std::vector<Entity*> touchedEnemies = isOtherEntityPresent("Enemy", point.x, point.y);
+		if (!touchedEnemies.empty())
+			for (Entity* enemyToDelete : touchedEnemies) enemyToDelete->shouldDelete = true;
 	}
 
+	//draw
 	deathRaySprite = new RectangleShape(Vector2f(C::GRID_SIZE * Entity::DEATH_RAY_LENGTH, C::GRID_SIZE * 1));
 	deathRaySprite->setPosition(
 		(player->facesLeft ? 
@@ -259,12 +264,13 @@ bool Game::hasCollisions(const float posX, const float posY)
 	return isWall(static_cast<int>(posX), static_cast<int>(posY));
 }
 
-Entity* Game::isOtherEntityPresent(string typeName, int x, int y)
+std::vector<Entity*> Game::isOtherEntityPresent(string typeName, int x, int y)
 {
+	std::vector<Entity*> results;
 	for (Entity* e : entities)
 		if (e->cx == x && e->cy == y && typeName == e->get_type_name())
-			return e;
-	return nullptr;
+			results.push_back(e);
+	return results;
 }
 
 void Game::gameOver()
