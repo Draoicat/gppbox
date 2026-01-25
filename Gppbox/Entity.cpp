@@ -19,7 +19,7 @@ void Entity::go_right()
 	dx += SPEED;
 }
 
-Entity::Entity(sf::Vector2f position, sf::Vector2f size)
+Entity::Entity(Vector2f position, Vector2f size)
 {
 	id = entityCount;
 	++entityCount;
@@ -153,7 +153,7 @@ void Entity::update(double deltaTime)
 	isKnockback = false;
 }
 
-void Entity::draw(sf::RenderWindow& win)
+void Entity::draw(RenderWindow& win)
 {
 	if (!sprite) return;
 	win.draw(*sprite);

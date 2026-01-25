@@ -2,12 +2,12 @@
 
 #include "Game.hpp"
 
-Enemy::Enemy(sf::Vector2f position, sf::Vector2f size) :
+Enemy::Enemy(Vector2f position, Vector2f size) :
 	Entity(position, size)
 {
-	sprite = new sf::RectangleShape({size.x, size.y});
+	sprite = new RectangleShape({size.x, size.y});
 	sprite->setOrigin({size.x * 0.5f,  size.y});
-	sprite->setFillColor(sf::Color::Red);
+	sprite->setFillColor(Color::Red);
 	set_grid_coordinates(position.x, position.y);
 }
 

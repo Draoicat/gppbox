@@ -85,7 +85,8 @@ public:
 	void death_ray();
 	static std::vector<Vector2i> bresenham(Vector2i origin, Vector2i goal);
 	double const DEATH_RAY_TIME_ON_SCREEN_SECONDS{ 0.2 };
-	double lastDeathRayTime{ 0.0 };
+	double const DEATH_RAY_TIMEOUT{ 10.0f };
+	double lastDeathRayTime{ -DEATH_RAY_TIMEOUT };
 	bool isGameOver{ false };
 	void gameOver();
 };

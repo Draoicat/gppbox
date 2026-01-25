@@ -98,7 +98,7 @@ void Game::pollInput(double dt) {
 		shoot();
 	}
 	if (Keyboard::isKeyPressed(Keyboard::Key::A) || rayButton) {
-		if (deathRaySprite) return;
+		if (g_time - lastDeathRayTime < DEATH_RAY_TIMEOUT) return;
 		death_ray();
 	}
 	if (Keyboard::isKeyPressed(Keyboard::Key::Space) || jumpButton) {
