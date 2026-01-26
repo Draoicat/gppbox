@@ -10,6 +10,8 @@
 #include "Projectile.hpp"
 #include "SaveSystem.h"
 
+//todo : screenshake, homing magic missile atan2, pet drone, animated sprites, camera scroll
+
 Game* Game::instance = 0;
 static int cols = C::RES_X / C::GRID_SIZE;
 static int lastLine = C::RES_Y / C::GRID_SIZE - 1;
@@ -79,6 +81,7 @@ float jump_time = 0.0f;
 
 void Game::pollInput(double dt) {
 	if (isGameOver) return;
+	if (g_time - lastDeathRayTime < DEATH_RAY_TIME_ON_SCREEN_SECONDS) return;
 
 	float x = Joystick::getAxisPosition(0, Joystick::Axis::X);
 	bool jumpButton = (Joystick::isButtonPressed(0, 0));
@@ -86,15 +89,13 @@ void Game::pollInput(double dt) {
 	bool rayButton = Joystick::isButtonPressed(0,2);
 
 	if (Keyboard::isKeyPressed(Keyboard::Key::Q) || x < -50) {
-		if (deathRaySprite) return;
+		
 		player->go_left();
 	}
 	if (Keyboard::isKeyPressed(Keyboard::Key::D) || x > 50) {
-		if (deathRaySprite) return;
 		player->go_right();
 	}
 	if (Keyboard::isKeyPressed(Keyboard::Key::Tab) || shootButton) {
-		if (deathRaySprite) return;
 		shoot();
 	}
 	if (Keyboard::isKeyPressed(Keyboard::Key::A) || rayButton) {
@@ -102,7 +103,6 @@ void Game::pollInput(double dt) {
 		death_ray();
 	}
 	if (Keyboard::isKeyPressed(Keyboard::Key::Space) || jumpButton) {
-		if (deathRaySprite) return;
 		if (!wasPressed) { // started
 			onSpacePressed();
 			wasPressed = true;
@@ -216,7 +216,8 @@ void Game::death_ray()
 	{
 		std::vector<Entity*> touchedEnemies = isOtherEntityPresent("Enemy", point.x, point.y);
 		if (!touchedEnemies.empty())
-			for (Entity* enemyToDelete : touchedEnemies) enemyToDelete->shouldDelete = true;
+			for (Entity* enemyToDelete : touchedEnemies) 
+				enemyToDelete->shouldDelete = true;
 	}
 
 	//draw
@@ -235,8 +236,18 @@ std::vector<Vector2i> Game::bresenham(Vector2i origin, Vector2i goal)
 {
 	std::vector<Vector2i> points;
 
+	if (goal.x < origin.x)
+	{
+		Vector2i temp = origin;
+		origin = goal;
+		goal = temp;
+	}
+	
 	int dx = goal.x - origin.x;
 	int dy = goal.y - origin.y;
+	
+
+	//dy should be 0 if I keep a horizontal line, keep that in mind in case you wanna optimise that uwu
 	int D = 2*dy - dx;
 	int y = origin.y;
 
