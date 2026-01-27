@@ -59,6 +59,7 @@ public:
 	void onSpacePressed();
 
 	void update(double dt);
+	void updateView(View* view, double const dt); //kinda like a late update? to update the cam after the player moves.
 	bool hasCollisions(float posX, float posY);
 	std::vector<Entity*> isOtherEntityPresent(string typeName, int x, int y);
 

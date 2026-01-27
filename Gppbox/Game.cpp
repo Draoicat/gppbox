@@ -6,6 +6,7 @@
 
 #include "Enemy.hpp"
 #include "HotReloadShader.hpp"
+#include "Interp.hpp"
 #include "Player.hpp"
 #include "Projectile.hpp"
 #include "SaveSystem.h"
@@ -154,7 +155,19 @@ void Game::update(double dt)
 	pollInput(dt);
 }
 
- void Game::draw(RenderWindow & win) {
+void Game::updateView(View* view, double const dt)
+{
+	//default pos is 800, 450
+	Vector2f origin = view->getCenter();
+	Vector2f offset = {600, -300};
+	Vector2f goal = {player->cx * 16 + offset.x, player->cy * 16 + offset.y};
+
+	
+	Interp::lerp(origin, goal, 0);
+	view->move(goal - origin);
+}
+
+void Game::draw(RenderWindow & win) {
 	if (closing) return;
 
 	RenderStates states = RenderStates::Default;

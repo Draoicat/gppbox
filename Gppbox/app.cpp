@@ -91,7 +91,7 @@ int main()
 	destFinal->create(window.getSize().x, window.getSize().y);
 	destFinal->clear(sf::Color(0, 0, 0, 0));	
 
-	float bloomWidth = 12;
+	float bloomWidth = 0;
 	sf::Glsl::Vec4 bloomMul(1,1,1,0.8f);
 
     while (window.isOpen())
@@ -128,11 +128,14 @@ int main()
 		ImGui::SFML::Update(window, sf::seconds((float)dt));
 
         g.update(dt);
+		g.updateView(&v, dt);
 		
 		if (ImGui::CollapsingHeader("View")) {
 			auto sz = v.getSize();
 			ImGui::Value("size x", sz.x);
 			ImGui::Value("size y", sz.y);
+			ImGui::Value("Center X", v.getCenter().x);
+			ImGui::Value("Center Y", v.getCenter().y);
 		}
 		if (ImGui::CollapsingHeader("App Stats", ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen)) {
 			//double df = (Lib::getTimeStamp() - frameStart);
