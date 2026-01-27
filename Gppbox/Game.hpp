@@ -69,6 +69,17 @@ public:
 	void imGui(RenderWindow& win);
 
 	// data manip
+
+	// alors
+	// en gros
+	// vu que la caméra scroll, les calculs pour les positions dans le level editor fonctionnent plus
+	// pour pas se compliquer la vie, je me suis dit, vu que la caméra se déplace par rapport à la pos du joueur
+	// gardons le calcul initial, et trouvons l'offset pour réaligner le level editor avec la position de la souris dans l'écran
+	// (comme si l'écran collait toujours avec la grille des positions, mais on la décale après)
+	// donc j'ai mit des valeurs dans imgui et j'ai tweaké petit à petit jusqu'à trouver ces magnifiques nombres magiques.
+	// oui.......... donc je l'ai nommé en tant qu'honneur, pour utilisation de imgui, du hot reload, et du code pas over-enginneer
+	Vector2i const MAGIC_DAVID{32, 47};
+
 	void loadPlayer(float const x, float const y);
 	void tryAddWall(float const x, float const y);
 	void addWall(int const x, int const y);

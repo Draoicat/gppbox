@@ -11,7 +11,7 @@
 #include "Projectile.hpp"
 #include "SaveSystem.h"
 
-//todo : screenshake, homing magic missile atan2, pet drone, animated sprites, camera scroll
+//todo : screenshake, homing magic missile atan2, pet drone, animated sprites
 
 Game* Game::instance = 0;
 static int cols = C::RES_X / C::GRID_SIZE;
@@ -155,18 +155,6 @@ void Game::update(double dt)
 	pollInput(dt);
 }
 
-void Game::updateView(View* view, double const dt)
-{
-	Vector2f origin = view->getCenter();
-	Vector2f offset = {300, -300};
-	Vector2f goal = (Vector2f(player->cx * 16 , player->cy * 16  ) + offset);
-	Vector2f displacement = Vector2f(Vector2f(goal.x * dt, goal.y * dt) - 
-									 Vector2f(origin.x * dt, origin.y * dt));
-
-	displacement = Vector2f(displacement.x * 6, displacement.y * 1.5f);
-	view->move(displacement);
-}
-
 void Game::draw(RenderWindow & win) {
 	if (closing) return;
 
@@ -258,7 +246,6 @@ std::vector<Vector2i> Game::bresenham(Vector2i origin, Vector2i goal)
 	
 	int dx = goal.x - origin.x;
 	int dy = goal.y - origin.y;
-	
 
 	//dy should be 0 if I keep a horizontal line, keep that in mind in case you wanna optimise that uwu
 	int D = 2*dy - dx;
@@ -309,10 +296,29 @@ void Game::save() const
 
 void Game::load()
 {	
-
 	SaveSystem::load_level(*this);
 	Entity::entityCount = 0;
 	Entity::totalEntityCount = 0;
+}
+
+void Game::updateView(View* view, double const dt)
+{
+	Vector2f origin = view->getCenter();
+	Vector2f offset = {300, -300}; //I want the player in a different position on the screen
+	Vector2f goal = Vector2f(player->cx * 16 , player->cy * 16  ) + offset;
+	Vector2f displacement;
+	if (levelEditorMode)
+	{
+		displacement = goal - origin;
+	}
+	else
+	{
+		displacement = Vector2f(Vector2f(goal.x * dt, goal.y * dt) - Vector2f(origin.x * dt, origin.y * dt));
+	}
+
+	displacement = Vector2f(displacement.x * 6, displacement.y * 1.5f);
+	view->move(displacement);
+
 }
 
 void Game::imGui(RenderWindow& win)
@@ -333,7 +339,6 @@ void Game::imGui(RenderWindow& win)
 				{ (float)(0 + x * C::GRID_SIZE), 0 }, { (float)(0 + x * C::GRID_SIZE), C::RES_Y }, IM_COL32(200, 200, 200, 150), 0.5f
 			);
 		}
-
 		for (int y = 0; y < C::RES_Y / C::GRID_SIZE; ++y)
 		{
 			ImGui::GetBackgroundDrawList()->AddLine(
@@ -343,11 +348,16 @@ void Game::imGui(RenderWindow& win)
 
 		RectangleShape fakeWall(Vector2f(C::GRID_SIZE, C::GRID_SIZE));
 		RectangleShape fakeEnemy(Vector2f(C::GRID_SIZE, C::GRID_SIZE * 2));
+
+		Vector2i cameraAlignmentOffset{ MAGIC_DAVID.x - player->cx, MAGIC_DAVID.y - player->cy};
+
 		// Preview
 		switch (levelEditorMode)
 		{
 		case WALL:
-			fakeWall.setPosition((int) (ImGui::GetMousePos().x / C::GRID_SIZE) * C::GRID_SIZE, (int) (ImGui::GetMousePos().y / C::GRID_SIZE) * C::GRID_SIZE);
+			fakeWall.setPosition(
+				(int) ((ImGui::GetMousePos().x / C::GRID_SIZE) * C::GRID_SIZE) - cameraAlignmentOffset.x * C::GRID_SIZE, 
+				(int) ((ImGui::GetMousePos().y / C::GRID_SIZE) * C::GRID_SIZE) - cameraAlignmentOffset.y * C::GRID_SIZE);
 			fakeWall.setFillColor(Color(0x07ff0777));
 			win.draw(fakeWall);
 			break;
@@ -364,12 +374,12 @@ void Game::imGui(RenderWindow& win)
 		{
 			placeWallMode = false;
 			for (Vector2i& wall : walls)
-				if (wall.x == (int) ImGui::GetMousePos().x / C::GRID_SIZE && wall.y == (int) ImGui::GetMousePos().y / C::GRID_SIZE) 
+				if (wall.x == (int) ImGui::GetMousePos().x / C::GRID_SIZE - cameraAlignmentOffset.x && wall.y == (int) ImGui::GetMousePos().y / C::GRID_SIZE- cameraAlignmentOffset.y) 
 					placeWallMode = true;
 			switch (levelEditorMode)
 			{
 			case ENEMY:
-				tryAddEnemy(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE);
+				tryAddEnemy(ImGui::GetMousePos().x / C::GRID_SIZE- cameraAlignmentOffset.x, ImGui::GetMousePos().y / C::GRID_SIZE- cameraAlignmentOffset.y);
 				break;
 			default:
 				break;
@@ -383,9 +393,9 @@ void Game::imGui(RenderWindow& win)
 			{
 			case WALL:
 				if (!placeWallMode)
-					tryAddWall(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE);
+					tryAddWall(ImGui::GetMousePos().x / C::GRID_SIZE- cameraAlignmentOffset.x, ImGui::GetMousePos().y / C::GRID_SIZE- cameraAlignmentOffset.y);
 				else
-					tryRemoveWall(ImGui::GetMousePos().x / C::GRID_SIZE, ImGui::GetMousePos().y / C::GRID_SIZE);
+					tryRemoveWall(ImGui::GetMousePos().x / C::GRID_SIZE- cameraAlignmentOffset.x, ImGui::GetMousePos().y / C::GRID_SIZE- cameraAlignmentOffset.y);
 				break;
 			default:
 				break;
@@ -441,9 +451,9 @@ void Game::addEnemy(float const x, float const y)
 void Game::tryAddWall(float const x, float const y)
 {
 	for (Vector2i& wall : walls)
-		if (wall.x == (int) x && wall.y == (int) y) //don't place two walls at the same spot 
+		if (wall.x == (int) x  && wall.y == (int) y ) //don't place two walls at the same spot 
 			return;
-	addWall(x, y);
+	addWall(x , y);
 }
 
 void Game::addWall(int const x, int const y)
@@ -455,7 +465,7 @@ void Game::addWall(int const x, int const y)
 void Game::tryRemoveWall(float const x, float const y)
 {
 	for (Vector2i& wall : walls)
-		if (wall.x == (int) x && wall.y == (int) y) //don't remove a wall that doesn't exist
+		if (wall.x == (int) x && wall.y == (int) y ) //don't remove a wall that doesn't exist
 			removeWall(wall);
 }
 
