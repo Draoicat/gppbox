@@ -127,8 +127,8 @@ int main()
 		//don't use imgui before this;
 		ImGui::SFML::Update(window, sf::seconds((float)dt));
 
-        g.update(dt);
 		g.updateView(&v, dt);
+        g.update(dt);
 		
 		if (ImGui::CollapsingHeader("View")) {
 			auto sz = v.getSize();

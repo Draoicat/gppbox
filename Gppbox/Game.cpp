@@ -157,14 +157,14 @@ void Game::update(double dt)
 
 void Game::updateView(View* view, double const dt)
 {
-	//default pos is 800, 450
 	Vector2f origin = view->getCenter();
-	Vector2f offset = {600, -300};
-	Vector2f goal = {player->cx * 16 + offset.x, player->cy * 16 + offset.y};
+	Vector2f offset = {300, -300};
+	Vector2f goal = (Vector2f(player->cx * 16 , player->cy * 16  ) + offset);
+	Vector2f displacement = Vector2f(Vector2f(goal.x * dt, goal.y * dt) - 
+									 Vector2f(origin.x * dt, origin.y * dt));
 
-	
-	Interp::lerp(origin, goal, 0);
-	view->move(goal - origin);
+	displacement = Vector2f(displacement.x * 6, displacement.y * 1.5f);
+	view->move(displacement);
 }
 
 void Game::draw(RenderWindow & win) {
