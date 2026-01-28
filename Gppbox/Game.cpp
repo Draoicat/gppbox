@@ -11,7 +11,7 @@
 #include "Projectile.hpp"
 #include "SaveSystem.h"
 
-//todo : screenshake, homing magic missile atan2, pet drone, animated sprites
+//todo : screenshake, killed, pet drone, animated sprites (muzzle), read me, align when level editor
 
 Game* Game::instance = 0;
 static int cols = C::RES_X / C::GRID_SIZE;
@@ -307,17 +307,23 @@ void Game::updateView(View* view, double const dt)
 	Vector2f offset = {300, -300}; //I want the player in a different position on the screen
 	Vector2f goal = Vector2f(player->cx * 16 , player->cy * 16  ) + offset;
 	Vector2f displacement;
-	if (levelEditorMode)
+	if (isLevelEditorOn)
 	{
 		displacement = goal - origin;
 	}
 	else
 	{
 		displacement = Vector2f(Vector2f(goal.x * dt, goal.y * dt) - Vector2f(origin.x * dt, origin.y * dt));
+		displacement = Vector2f(displacement.x * 6, displacement.y * 1.5f);
 	}
 
-	displacement = Vector2f(displacement.x * 6, displacement.y * 1.5f);
 	view->move(displacement);
+	if (isLevelEditorOn)
+	{
+		int amountX = (int) view->getCenter().x % C::GRID_SIZE;
+		int amountY = (int) view->getCenter().y % C::GRID_SIZE;
+		view->setCenter(view->getCenter().x - amountX, view->getCenter().y - amountY);
+	}
 
 }
 
@@ -350,21 +356,22 @@ void Game::imGui(RenderWindow& win)
 		RectangleShape fakeEnemy(Vector2f(C::GRID_SIZE, C::GRID_SIZE * 2));
 
 		Vector2i cameraAlignmentOffset{ MAGIC_DAVID.x - player->cx, MAGIC_DAVID.y - player->cy};
-
+		Vector2f fakesPosition = Vector2f(
+			 (((int) ImGui::GetMousePos().x / C::GRID_SIZE * C::GRID_SIZE) -  (cameraAlignmentOffset.x * C::GRID_SIZE)),
+			 ((int) ImGui::GetMousePos().y / C::GRID_SIZE * C::GRID_SIZE) - (cameraAlignmentOffset.y * C::GRID_SIZE)
+		);
 		// Preview
 		switch (levelEditorMode)
 		{
 		case WALL:
-			fakeWall.setPosition(
-				(int) ((ImGui::GetMousePos().x / C::GRID_SIZE) * C::GRID_SIZE) - cameraAlignmentOffset.x * C::GRID_SIZE, 
-				(int) ((ImGui::GetMousePos().y / C::GRID_SIZE) * C::GRID_SIZE) - cameraAlignmentOffset.y * C::GRID_SIZE);
+			fakeWall.setPosition(fakesPosition);
 			fakeWall.setFillColor(Color(0x07ff0777));
 			win.draw(fakeWall);
 			break;
 		case ENEMY:
 			fakeEnemy.setFillColor(Color::Red);
 			fakeEnemy.setOrigin({ C::GRID_SIZE * 0.5f, C::GRID_SIZE * 2 });
-			fakeEnemy.setPosition((int) (ImGui::GetMousePos().x / C::GRID_SIZE) * C::GRID_SIZE, (int) (ImGui::GetMousePos().y / C::GRID_SIZE) * C::GRID_SIZE);
+			fakeEnemy.setPosition(fakesPosition);
 			win.draw(fakeEnemy);
 			break;
 		}
