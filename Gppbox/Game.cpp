@@ -168,7 +168,7 @@ void Game::petFollow(double const dt)
 	else if (player->cx - pet->cx < petOffset.x) pet->go_left();
 
 	if (player->cy - pet->cy > petOffset.y) pet->go_down();
-	if (player->cy - pet->cy < petOffset.y) pet->go_up();
+	else if (player->cy - pet->cy < petOffset.y) pet->go_up();
 }
 
 void Game::updateView(View* view, double const dt)

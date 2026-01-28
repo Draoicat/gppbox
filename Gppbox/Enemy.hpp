@@ -20,6 +20,7 @@ public:
 protected:
 	bool check_left_collision() override;
 	bool check_right_collision() override;
+	bool check_bottom_collision() override;
 
 	Entity* checkForEntities(int x, int y);
 

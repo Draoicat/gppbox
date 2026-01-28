@@ -25,6 +25,16 @@ bool Enemy::die(Entity* projectile)
 	return true;
 }
 
+bool Enemy::check_bottom_collision()
+{
+	bool collides = Entity::check_bottom_collision();
+	if (!Game::instance->hasCollisions(cx + (facesLeft ? -1 : 1), cy + 1))
+	{
+		facesLeft = !facesLeft;
+	}
+	return collides;
+}
+
 bool Enemy::check_left_collision()
 {
 	for (int y = cy; y > cy - sy; --y)

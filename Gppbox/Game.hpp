@@ -109,6 +109,6 @@ public:
 	void gameOver();
 	
 
-	Vector2i const petOffset{-1, 3};
+	Vector2i const petOffset{4, 3};
 	void petFollow(double const dt);
 };
