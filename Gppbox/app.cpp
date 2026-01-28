@@ -91,7 +91,7 @@ int main()
 	destFinal->create(window.getSize().x, window.getSize().y);
 	destFinal->clear(sf::Color(0, 0, 0, 0));	
 
-	float bloomWidth = 0;
+	float bloomWidth = 10;
 	sf::Glsl::Vec4 bloomMul(1,1,1,0.8f);
 
     while (window.isOpen())
@@ -169,6 +169,7 @@ int main()
 		if (blurShader) blurShader->update(dt);
 		if (bloomShader) bloomShader->update(dt);
 
+		window.setView(window.getDefaultView()) ; //fixed bloom with camera scroll
 		if (bloomWidth)
 			Bloom::render(window,winTex,destX,destFinal,&blurShader->sh,&bloomShader->sh, bloomWidth, bloomMul);
 
