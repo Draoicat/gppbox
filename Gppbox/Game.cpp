@@ -11,7 +11,7 @@
 #include "Projectile.hpp"
 #include "SaveSystem.h"
 
-//todo : screenshake, killed, pet drone, animated sprites (muzzle), read me, align when level editor
+//todo : screenshake, killed, pet drone, animated sprites (muzzle), read me
 
 Game* Game::instance = 0;
 static int cols = C::RES_X / C::GRID_SIZE;

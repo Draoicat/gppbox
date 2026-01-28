@@ -7,9 +7,9 @@ Projectile::Projectile(sf::Vector2f position, sf::Vector2f size, bool left) :
 {
 	facesLeft = left;
 	has_gravity = false;
-	sprite = new sf::RectangleShape({size.x, size.y});
-	sprite->setOrigin({size.x * 0.5f,  size.y});
-	sprite->setFillColor(sf::Color::Yellow);
+	sprite = new sf::CircleShape(25.0f);
+	sprite->setOrigin({size.x * 2.0f,  size.y * 2.0f});
+	sprite->setFillColor(sf::Color::White);
 	set_grid_coordinates(position.x, position.y);
 	initialCx = cx;
 }
@@ -20,6 +20,18 @@ void Projectile::update(double deltaTime)
 	Entity::update(deltaTime);
 	if (shouldDelete) return;
 	shouldDelete = abs(cx - initialCx) > MAX_DISTANCE;
+	if (hasRectangleShapeBeenInitialized) return;
+	if (isProjectileFirstFrame)
+	{
+		isProjectileFirstFrame = false;
+	}
+	else
+	{
+		sprite = new RectangleShape({(float) C::GRID_SIZE * sx, (float) C::GRID_SIZE * sy});
+		sprite->setOrigin({(float)sx * C::GRID_SIZE * 0.5f,  (float)sy*C::GRID_SIZE});
+		sprite->setFillColor(sf::Color::Yellow);
+		hasRectangleShapeBeenInitialized = true;
+	}
 }
 
 bool Projectile::check_right_collision()

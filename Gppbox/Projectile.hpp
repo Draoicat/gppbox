@@ -8,6 +8,10 @@ class Projectile :
 {
 public:
     int static constexpr MAX_DISTANCE{ 150 };
+
+    bool isProjectileFirstFrame{ true };
+    bool hasRectangleShapeBeenInitialized{ false };
+
     Projectile(sf::Vector2f position, sf::Vector2f size, bool facesLeft);
     std::string get_type_name() const override  { return "Projectile"; }
 

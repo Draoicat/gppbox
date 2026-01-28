@@ -28,6 +28,7 @@ public:
 
 	RectangleShape				bg;
 	RectangleShape* deathRaySprite;
+	
 	HotReloadShader *				bgShader = nullptr;
 
 	Texture						tex;
