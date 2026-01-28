@@ -105,10 +105,9 @@ public:
 	double lastDeathRayTime{ -DEATH_RAY_TIMEOUT };
 
 	Vector2f const respawnPoint{3, 53};
-	bool isGameOver{ false };
-	void gameOver();
+	void respawn();
 	
 
-	Vector2i const petOffset{4, 3};
+	Vector2i petOffset{4, 3};
 	void petFollow(double const dt);
 };

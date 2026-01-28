@@ -29,9 +29,7 @@ bool Enemy::check_bottom_collision()
 {
 	bool collides = Entity::check_bottom_collision();
 	if (!Game::instance->hasCollisions(cx + (facesLeft ? -1 : 1), cy + 1))
-	{
 		facesLeft = !facesLeft;
-	}
 	return collides;
 }
 

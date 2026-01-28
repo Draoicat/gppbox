@@ -82,7 +82,6 @@ static double g_tickTimer = 0.0;
 float jump_time = 0.0f;
 
 void Game::pollInput(double dt) {
-	if (isGameOver) return;
 	if (g_time - lastDeathRayTime < DEATH_RAY_TIME_ON_SCREEN_SECONDS) return;
 
 	float x = Joystick::getAxisPosition(0, Joystick::Axis::X);
@@ -147,11 +146,8 @@ void Game::update(double dt)
 		e->update(dt);
 	}
 
-	if (player->cy > 100)
-	{
-		player->cx = respawnPoint.x;
-		player->cy = respawnPoint.y;
-	}
+	if (player->cy > 100) respawn();
+	if (!isOtherEntityPresent("Enemy", player->cx, player->cy).empty()) respawn();
 
 	if (bgShader) bgShader->update(dt);
 
@@ -169,6 +165,8 @@ void Game::petFollow(double const dt)
 
 	if (player->cy - pet->cy > petOffset.y) pet->go_down();
 	else if (player->cy - pet->cy < petOffset.y) pet->go_up();
+
+	petOffset = Vector2i(petOffset.x, player->cy - pet->cy);
 }
 
 void Game::updateView(View* view, double const dt)
@@ -320,11 +318,6 @@ std::vector<Entity*> Game::isOtherEntityPresent(string typeName, int x, int y)
 		if (e->cx == x && e->cy == y && typeName == e->get_type_name())
 			results.push_back(e);
 	return results;
-}
-
-void Game::gameOver()
-{
-	isGameOver = true;
 }
 
 void Game::save() const
@@ -499,4 +492,10 @@ void Game::removeWall(Vector2i const& wall)
 {
 	walls.erase(std::remove(walls.begin(), walls.end(), wall), walls.end());
 	cacheWalls();
+}
+
+void Game::respawn()
+{
+	player->cx = respawnPoint.x;
+	player->cy = respawnPoint.y;
 }

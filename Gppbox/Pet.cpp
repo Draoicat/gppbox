@@ -17,10 +17,10 @@ std::string Pet::get_type_name() const
 
 void Pet::go_up()
 {
-	dy += (-SPEED / 16);
+	dy += (-SPEED / 3);
 }
 
 void Pet::go_down()
 {
-	dy += (SPEED / 16);
+	dy += (SPEED / 3);
 }
