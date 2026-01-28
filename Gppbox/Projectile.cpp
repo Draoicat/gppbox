@@ -2,13 +2,14 @@
 
 #include "Game.hpp"
 
-Projectile::Projectile(sf::Vector2f position, sf::Vector2f size, bool left) :
+Projectile::Projectile(sf::Vector2f position, sf::Vector2f size, Vector2i givenDirection) :
 	Entity(position, size)
 {
-	facesLeft = left;
+	direction = givenDirection;
+	facesLeft = false; //unused here
 	has_gravity = false;
-	sprite = new sf::CircleShape(25.0f);
-	sprite->setOrigin({size.x * 2.0f,  size.y * 2.0f});
+	sprite = new sf::CircleShape(size.x);
+	sprite->setOrigin({size.x * 1.0f,  size.y * 1.5f});
 	sprite->setFillColor(sf::Color::White);
 	set_grid_coordinates(position.x, position.y);
 	initialCx = cx;
@@ -16,7 +17,8 @@ Projectile::Projectile(sf::Vector2f position, sf::Vector2f size, bool left) :
 
 void Projectile::update(double deltaTime)
 {
-	dx += 2 * (facesLeft ? -SPEED : SPEED);
+	dx += 2 * direction.x * SPEED;
+	dy += 2 * direction.y * SPEED;
 	Entity::update(deltaTime);
 	if (shouldDelete) return;
 	shouldDelete = abs(cx - initialCx) > MAX_DISTANCE;
@@ -51,16 +53,4 @@ bool Projectile::check_left_collision()
 bool Projectile::check_bottom_collision()
 {
 	return false;
-}
-
-void Projectile::go_left()
-{
-	Entity::go_left();
-	dx += -SPEED;
-}
-
-void Projectile::go_right()
-{
-	Entity::go_right();
-	dx += SPEED;
 }

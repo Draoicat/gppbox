@@ -136,6 +136,12 @@ void Game::update(double dt)
 	if (lastShotDeltaTime < (1 / playerShootRatePerSeconds)) lastShotDeltaTime += dt;
 	else canPlayerShoot = true;
 
+	if (isScreenshaking && g_time - screenshotStartTime > SCREENSHAKE_TIME_SECONDS)
+		isScreenshaking = false;
+
+	/*if (lastPetShortDeltaTime < (1 / petShootRatePerSeconds)) lastPetShortDeltaTime += dt;
+	else petShoot();*/
+
 	if (g_time - lastDeathRayTime > DEATH_RAY_TIME_ON_SCREEN_SECONDS)
 		deathRaySprite = nullptr;
 
@@ -169,8 +175,10 @@ void Game::petFollow(double const dt)
 	petOffset = Vector2i(petOffset.x, player->cy - pet->cy);
 }
 
+
 void Game::updateView(View* view, double const dt)
 {
+	//move view to player
 	Vector2f origin = view->getCenter();
 	Vector2f offset = {300, -300}; //I want the player in a different position on the screen
 	Vector2f goal = Vector2f(player->cx * 16 , player->cy * 16  ) + offset;
@@ -191,6 +199,19 @@ void Game::updateView(View* view, double const dt)
 		int amountX = (int) view->getCenter().x % C::GRID_SIZE;
 		int amountY = (int) view->getCenter().y % C::GRID_SIZE;
 		view->setCenter(view->getCenter().x - amountX, view->getCenter().y - amountY);
+	}
+
+	// screenshake
+	if (isScreenshaking)
+	{
+		if (g_time - screenshotStartTime > SCREENSHAKE_TIME_SECONDS / 3)
+		{
+			view->move(Vector2f(0, 1));
+		}
+		else if (g_time - screenshotStartTime < SCREENSHAKE_TIME_SECONDS / 3)
+		{
+			view->move(Vector2f(0, -1));
+		}
 	}
 }
 
@@ -236,7 +257,18 @@ void Game::shoot()
 	lastShotDeltaTime = 0.0f;
 	canPlayerShoot = false;
 	player->isKnockback = true;
-	entities.emplace_back(new Projectile({(float) entities[0]->cx + (player->facesLeft ? -2 : 2), (float) entities[0]->cy + 0.5f }, {C::GRID_SIZE, C::GRID_SIZE}, player->facesLeft));
+	Vector2i direction(player->facesLeft ? -1 : 1, 0);
+	entities.emplace_back(new Projectile({(float) entities[0]->cx + (player->facesLeft ? -2 : 2), (float) entities[0]->cy + 0.5f }, {C::GRID_SIZE, C::GRID_SIZE}, direction));
+}
+
+void Game::petShoot()
+{
+	if (!canPetShoot) return;
+	/*std::vector<Entity*> enemies = */
+	lastPetShortDeltaTime = 0.0f;
+	Vector2i directionToEnemy(1, 1);
+	entities.emplace_back(
+		new Projectile({(float) pet->cx, (float) pet->cy }, {C::GRID_SIZE, C::GRID_SIZE}, directionToEnemy));
 }
 
 void Game::death_ray()
@@ -260,7 +292,7 @@ void Game::death_ray()
 				enemyToDelete->shouldDelete = true;
 	}
 
-	//draw
+	//prepare sprite
 	deathRaySprite = new RectangleShape(Vector2f(C::GRID_SIZE * Entity::DEATH_RAY_LENGTH, C::GRID_SIZE * 1));
 	deathRaySprite->setPosition(
 		(player->facesLeft ? 
@@ -270,6 +302,8 @@ void Game::death_ray()
 		C::GRID_SIZE *  (player->cy - 0.5)
 	);
 	deathRaySprite->setFillColor(Color(0xffffffff));
+
+	screenshake();
 }
 
 std::vector<Vector2i> Game::bresenham(Vector2i origin, Vector2i goal)
@@ -304,10 +338,15 @@ std::vector<Vector2i> Game::bresenham(Vector2i origin, Vector2i goal)
 	return points;
 }
 
+void Game::screenshake()
+{
+	if (isScreenshaking) return;
+	isScreenshaking = true;
+	screenshotStartTime = g_time;
+}
+
 bool Game::hasCollisions(const float posX, const float posY)
 {
-	
-
 	return isWall(static_cast<int>(posX), static_cast<int>(posY));
 }
 
@@ -360,7 +399,7 @@ void Game::imGui(RenderWindow& win)
 		RectangleShape fakeWall(Vector2f(C::GRID_SIZE, C::GRID_SIZE));
 		RectangleShape fakeEnemy(Vector2f(C::GRID_SIZE, C::GRID_SIZE * 2));
 
-		Vector2i cameraAlignmentOffset{ MAGIC_DAVID.x - player->cx, MAGIC_DAVID.y - player->cy};
+		Vector2i cameraAlignmentOffset{ PLAYER_POS_OFFSET_WITH_INITIAL_CAMERA.x - player->cx, PLAYER_POS_OFFSET_WITH_INITIAL_CAMERA.y - player->cy};
 		Vector2f fakesPosition = Vector2f(
 			 (((int) ImGui::GetMousePos().x / C::GRID_SIZE * C::GRID_SIZE) -  (cameraAlignmentOffset.x * C::GRID_SIZE)),
 			 ((int) ImGui::GetMousePos().y / C::GRID_SIZE * C::GRID_SIZE) - (cameraAlignmentOffset.y * C::GRID_SIZE)
