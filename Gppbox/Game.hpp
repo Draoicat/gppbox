@@ -11,6 +11,7 @@
 #include "ParticleMan.hpp"
 
 #include "C.hpp"
+#include "Pet.h"
 #include "Player.hpp"
 
 enum EditorMode 
@@ -39,6 +40,7 @@ public:
 	std::vector<RectangleShape> wallSprites;
 
 	Player* player;
+	Pet* pet;
 	std::vector<Entity*>			entities;
 
 	double playerShootRatePerSeconds{8};
@@ -82,6 +84,7 @@ public:
 	Vector2i const MAGIC_DAVID{32, 47};
 
 	void loadPlayer(float const x, float const y);
+	void loadPet(float const x, float const y);
 	void tryAddWall(float const x, float const y);
 	void addWall(int const x, int const y);
 	void tryRemoveWall(float const x, float const y);
@@ -100,6 +103,12 @@ public:
 	double const DEATH_RAY_TIME_ON_SCREEN_SECONDS{ 0.2 };
 	double const DEATH_RAY_TIMEOUT{ 10.0f };
 	double lastDeathRayTime{ -DEATH_RAY_TIMEOUT };
+
+	Vector2f const respawnPoint{3, 53};
 	bool isGameOver{ false };
 	void gameOver();
+	
+
+	Vector2i const petOffset{-1, 3};
+	void petFollow(double const dt);
 };

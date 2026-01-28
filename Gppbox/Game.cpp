@@ -6,12 +6,12 @@
 
 #include "Enemy.hpp"
 #include "HotReloadShader.hpp"
-#include "Interp.hpp"
+
 #include "Player.hpp"
 #include "Projectile.hpp"
 #include "SaveSystem.h"
 
-//todo : screenshake, killed, pet drone, animated sprites (muzzle), read me
+//todo : screenshake, killed, pet drone, read me
 
 Game* Game::instance = 0;
 static int cols = C::RES_X / C::GRID_SIZE;
@@ -42,7 +42,8 @@ Game::Game(RenderWindow * win) {
 	playerSprite.setFillColor( Color::White );
 	playerSprite.setOutlineColor(Color::Black);
 	
-	loadPlayer(3, 50);
+	loadPlayer(respawnPoint.x, respawnPoint.y);
+	loadPet(2, 51);
 
 	// enemy creation
 	entities.push_back(new Enemy({80, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
@@ -90,7 +91,6 @@ void Game::pollInput(double dt) {
 	bool rayButton = Joystick::isButtonPressed(0,2);
 
 	if (Keyboard::isKeyPressed(Keyboard::Key::Q) || x < -50) {
-		
 		player->go_left();
 	}
 	if (Keyboard::isKeyPressed(Keyboard::Key::D) || x > 50) {
@@ -139,12 +139,18 @@ void Game::update(double dt)
 
 	if (g_time - lastDeathRayTime > DEATH_RAY_TIME_ON_SCREEN_SECONDS)
 		deathRaySprite = nullptr;
-	
+
 	for (Entity* e : entities)
 	{
 		if (e->shouldDelete)
 			entities.erase(std::remove(entities.begin(), entities.end(), e), entities.end());
 		e->update(dt);
+	}
+
+	if (player->cy > 100)
+	{
+		player->cx = respawnPoint.x;
+		player->cy = respawnPoint.y;
 	}
 
 	if (bgShader) bgShader->update(dt);
@@ -153,6 +159,41 @@ void Game::update(double dt)
 	afterParts.update(dt);
 	
 	pollInput(dt);
+	petFollow(dt);
+}
+
+void Game::petFollow(double const dt)
+{
+	if (player->cx - pet->cx > petOffset.x) pet->go_right();
+	else if (player->cx - pet->cx < petOffset.x) pet->go_left();
+
+	if (player->cy - pet->cy > petOffset.y) pet->go_down();
+	if (player->cy - pet->cy < petOffset.y) pet->go_up();
+}
+
+void Game::updateView(View* view, double const dt)
+{
+	Vector2f origin = view->getCenter();
+	Vector2f offset = {300, -300}; //I want the player in a different position on the screen
+	Vector2f goal = Vector2f(player->cx * 16 , player->cy * 16  ) + offset;
+	Vector2f displacement;
+	if (isLevelEditorOn)
+	{
+		displacement = goal - origin;
+	}
+	else
+	{
+		displacement = Vector2f(Vector2f(goal.x * dt, goal.y * dt) - Vector2f(origin.x * dt, origin.y * dt));
+		displacement = Vector2f(displacement.x * 6, displacement.y * 1.5f);
+	}
+
+	view->move(displacement);
+	if (isLevelEditorOn)
+	{
+		int amountX = (int) view->getCenter().x % C::GRID_SIZE;
+		int amountY = (int) view->getCenter().y % C::GRID_SIZE;
+		view->setCenter(view->getCenter().x - amountX, view->getCenter().y - amountY);
+	}
 }
 
 void Game::draw(RenderWindow & win) {
@@ -267,10 +308,7 @@ std::vector<Vector2i> Game::bresenham(Vector2i origin, Vector2i goal)
 
 bool Game::hasCollisions(const float posX, const float posY)
 {
-	if (posX < 1.0f) return true;
-
-	int wallRightX = (C::RES_X / C::GRID_SIZE) - 1;
-	if (posX >= wallRightX) return true;
+	
 
 	return isWall(static_cast<int>(posX), static_cast<int>(posY));
 }
@@ -299,32 +337,6 @@ void Game::load()
 	SaveSystem::load_level(*this);
 	Entity::entityCount = 0;
 	Entity::totalEntityCount = 0;
-}
-
-void Game::updateView(View* view, double const dt)
-{
-	Vector2f origin = view->getCenter();
-	Vector2f offset = {300, -300}; //I want the player in a different position on the screen
-	Vector2f goal = Vector2f(player->cx * 16 , player->cy * 16  ) + offset;
-	Vector2f displacement;
-	if (isLevelEditorOn)
-	{
-		displacement = goal - origin;
-	}
-	else
-	{
-		displacement = Vector2f(Vector2f(goal.x * dt, goal.y * dt) - Vector2f(origin.x * dt, origin.y * dt));
-		displacement = Vector2f(displacement.x * 6, displacement.y * 1.5f);
-	}
-
-	view->move(displacement);
-	if (isLevelEditorOn)
-	{
-		int amountX = (int) view->getCenter().x % C::GRID_SIZE;
-		int amountY = (int) view->getCenter().y % C::GRID_SIZE;
-		view->setCenter(view->getCenter().x - amountX, view->getCenter().y - amountY);
-	}
-
 }
 
 void Game::imGui(RenderWindow& win)
@@ -440,6 +452,13 @@ void Game::loadPlayer(float const x, float const y)
 	if (player != nullptr) return;
 	player = new Player({ x, y }, { C::GRID_SIZE, C::GRID_SIZE * 2 });
 	entities.push_back(player);
+}
+
+void Game::loadPet(float const x, float const y)
+{
+	if (pet != nullptr) return;
+	pet = new Pet({ x, y }, { C::GRID_SIZE / 2, C::GRID_SIZE / 2 });
+	entities.push_back(pet);
 }
 
 void Game::tryAddEnemy(float const x, float const y)

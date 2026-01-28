@@ -27,9 +27,13 @@ void SaveSystem::save_level(Game const& gameState)
 	outFile << "Player\n";
 	outFile << gameState.player->cx << "," << gameState.player->cy << '\n';
 
+	outFile << "Pet\n";
+	outFile << gameState.pet->cx << "," << gameState.pet->cy << '\n';
+
 	outFile << "Entities\n";
 	auto entityIterator = gameState.entities.begin();
 	++entityIterator; //skip player
+	++entityIterator; //skip pet
 	for (; entityIterator != gameState.entities.end(); ++entityIterator)
 		outFile << (*entityIterator)->cx << "," << (*entityIterator)->cy << '\n';
 
@@ -55,6 +59,7 @@ void SaveSystem::load_level(Game& outGameState)
 	while (std::getline(inFile, line))
 	{
 		if (line == "Walls") loadState = LoadState::WALLS;
+		else if (line == "Pet") loadState = LoadState::PET;
 		else if (line == "Player") loadState = LoadState::PLAYER;
 		else if (line == "Entities") loadState = LoadState::ENEMIES;
 		else
@@ -77,6 +82,9 @@ void SaveSystem::load_level(Game& outGameState)
 				break;
 			case LoadState::ENEMIES:
 				outGameState.addEnemy(stoi(xS), stoi(yS));
+				break;
+			case LoadState::PET:
+				outGameState.loadPet(stoi(xS), stoi(yS));
 				break;
 			}
 		}

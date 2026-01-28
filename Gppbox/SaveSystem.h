@@ -7,7 +7,7 @@ class SaveSystem
 public:
 	enum LoadState //sooo what are we loading rn? :3
 	{
-		WALLS, PLAYER, ENEMIES
+		WALLS, PLAYER, ENEMIES, PET
 	};
 
 	static void save_level(Game const& gameState);
