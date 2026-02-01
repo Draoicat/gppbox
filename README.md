@@ -14,10 +14,10 @@ MIT whatevers
 
 # Controls (keyboard / controller)
 
-left & right arrow / left stick : move
-space / south button : jump
-tab / east button : shoot a projectile
-a / west button : shoot your death ray (10 seconds recharge!)
+- left & right arrow / left stick : move
+- space / south button : jump
+- tab / east button : shoot a projectile
+- a / west button : shoot your death ray (10 seconds recharge!)
 
 # Features
 
