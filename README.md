@@ -7,7 +7,7 @@ It embeds:
 - imgui
 - sfml
 - eastl
-- 
+
 LICENCE
 
 MIT whatevers
@@ -39,8 +39,12 @@ MIT whatevers
 - Enjoy the company of your pet drone, who will help you with nearby enemies when possible.
 - Turn off the bloom or screenshake to your liking.
 - Use the level editor to create your own level, and save it to use it in game!
+- Cool muzzle fire
 
-# Other
+# Comments
 
 I have left the game untouched because I didn't feel like customizing it. I focused on the gpp part only.
-All mandatory features are present except for the homing magic missile. Optionals features weren't added.
+All mandatory features are present except for the homing magic missile.
+Optionals features weren't added.
+Collisions and pet drone navigation are a bit broken :(
+There's a delay between enemy death and projectile collision on some hardware???
