@@ -11,7 +11,6 @@
 #include "Projectile.hpp"
 #include "SaveSystem.h"
 
-//todo : pet drone, read me
 
 Game* Game::instance = 0;
 static int cols = C::RES_X / C::GRID_SIZE;
@@ -32,21 +31,22 @@ Game::Game(RenderWindow * win) {
 
 	bgShader = new HotReloadShader("res/bg.vert", "res/bg.frag");
 	
-	for (int i = 0; i < C::RES_X / C::GRID_SIZE; ++i)
-		addWall(i, lastLine);
-	
-	cacheWalls();
+	//for (int i = 0; i < C::RES_X / C::GRID_SIZE; ++i)
+	//	addWall(i, lastLine);
+	//
+	//cacheWalls();
 
 	//player
 	RectangleShape playerSprite({C::GRID_SIZE, C::GRID_SIZE * 2});
 	playerSprite.setFillColor( Color::White );
 	playerSprite.setOutlineColor(Color::Black);
 	
-	loadPlayer(respawnPoint.x, respawnPoint.y);
-	loadPet(2, 51);
+	load();
+	/*loadPlayer(respawnPoint.x, respawnPoint.y);
+	loadPet(2, 51);*/
 
-	// enemy creation
-	entities.push_back(new Enemy({80, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
+	//// enemy creation
+	//entities.push_back(new Enemy({80, 50}, {C::GRID_SIZE, C::GRID_SIZE * 2}));
 }
 
 void Game::cacheWalls()
@@ -136,6 +136,9 @@ void Game::update(double dt)
 	if (lastShotDeltaTime < (1 / playerShootRatePerSeconds)) lastShotDeltaTime += dt;
 	else canPlayerShoot = true;
 
+	if (lastPetShortDeltaTime < (1 / petShootRatePerSeconds)) lastPetShortDeltaTime += dt;
+	else canPetShoot = true;
+
 	if (isScreenshaking && g_time - screenshotStartTime > SCREENSHAKE_TIME_SECONDS)
 		isScreenshaking = false;
 
@@ -152,7 +155,7 @@ void Game::update(double dt)
 		e->update(dt);
 	}
 
-	if (player->cy > 100) respawn();
+	if (player->cy > 100) load();
 	if (!isOtherEntityPresent("Enemy", player->cx, player->cy).empty()) respawn();
 
 	if (bgShader) bgShader->update(dt);
@@ -165,6 +168,11 @@ void Game::update(double dt)
 
 	Entity* potentialEnemy = pet->scan_for_enemies();
 	if (potentialEnemy != nullptr) petShoot(potentialEnemy);
+
+	//tp, this is the last thing I'm coding in this
+	if (abs(pet->cx - player->cx) > PET_LIMIT) pet->cx = player->cx - petOffset.x;
+	if (abs(pet->cy - player->cy) > PET_LIMIT) pet->cy = player->cy - petOffset.y;
+
 }
 
 void Game::petFollow(double const dt)
@@ -272,8 +280,9 @@ void Game::shoot()
 void Game::petShoot(Entity* target)
 {
 	if (!canPetShoot) return;
-	/*std::vector<Entity*> enemies = */
 	lastPetShortDeltaTime = 0.0f;
+	canPetShoot = false;
+	/*std::vector<Entity*> enemies = */
 	entities.emplace_back(
 		new Projectile(
 			{(float) pet->cx, (float) pet->cy }, 

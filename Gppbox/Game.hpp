@@ -47,9 +47,11 @@ public:
 	bool canPlayerShoot{ true };
 	double lastShotDeltaTime{ 0.0f };
 
-	double petShootRatePerSeconds{0.5f};
+	double petShootRatePerSeconds{2.0f};
 	bool canPetShoot{true};
 	double lastPetShortDeltaTime{ 0.0f };
+
+	int const PET_LIMIT{ 10};
 
 	ParticleMan beforeParts;
 	ParticleMan afterParts;
