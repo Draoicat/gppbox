@@ -502,7 +502,6 @@ void Game::loadPlayer(float const x, float const y)
 
 void Game::loadPet(float const x, float const y)
 {
-	if (pet != nullptr) return;
 	pet = new Pet({ x, y }, { C::GRID_SIZE / 2, C::GRID_SIZE / 2 });
 	entities.push_back(pet);
 }
@@ -549,6 +548,7 @@ void Game::removeWall(Vector2i const& wall)
 
 void Game::respawn()
 {
+	load();
 	player->cx = respawnPoint.x;
 	player->cy = respawnPoint.y;
 	pet->cx = respawnPoint.x - petOffset.x;
