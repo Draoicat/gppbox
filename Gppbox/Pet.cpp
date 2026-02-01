@@ -1,5 +1,7 @@
 #include "Pet.h"
 
+#include "Game.hpp"
+
 Pet::Pet(sf::Vector2f position, sf::Vector2f size) :
 	Entity(position, size)
 {
@@ -23,4 +25,19 @@ void Pet::go_up()
 void Pet::go_down()
 {
 	dy += (SPEED / 3);
+}
+
+
+Entity* Pet::scan_for_enemies()
+{
+	std::vector<Entity*> enemies;
+	for (int x = cx -ENEMY_RANGE; x < cx + ENEMY_RANGE; ++x)
+	{
+		for (int y = cy - ENEMY_RANGE; y < cy + ENEMY_RANGE; ++y)
+		{
+			enemies = Game::instance->isOtherEntityPresent("Enemy", x, y);
+			if (!enemies.empty()) return enemies.at(0);
+		}
+	}
+	return nullptr;
 }

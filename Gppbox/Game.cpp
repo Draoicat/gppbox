@@ -21,14 +21,14 @@ Game::Game(RenderWindow * win) {
 	instance = this;
 
 	this->win = win;
-	bg = RectangleShape(Vector2f((float)win->getSize().x, (float)win->getSize().y));
+	/*bg = RectangleShape(Vector2f((float)win->getSize().x, (float)win->getSize().y));
 
 	bool isOk = tex.loadFromFile("res/bg_stars.png");
 	if (!isOk) {
 		printf("ERR : LOAD FAILED\n");
 	}
 	bg.setTexture(&tex);
-	bg.setSize(Vector2f(C::RES_X, C::RES_Y));
+	bg.setSize(Vector2f(C::RES_X, C::RES_Y * 8));*/
 
 	bgShader = new HotReloadShader("res/bg.vert", "res/bg.frag");
 	
@@ -162,6 +162,9 @@ void Game::update(double dt)
 	
 	pollInput(dt);
 	petFollow(dt);
+
+	Entity* potentialEnemy = pet->scan_for_enemies();
+	if (potentialEnemy != nullptr) petShoot(potentialEnemy);
 }
 
 void Game::petFollow(double const dt)
@@ -180,7 +183,7 @@ void Game::updateView(View* view, double const dt)
 {
 	//move view to player
 	Vector2f origin = view->getCenter();
-	Vector2f offset = {300, -300}; //I want the player in a different position on the screen
+	Vector2f offset = {300, -150}; //I want the player in a different position on the screen
 	Vector2f goal = Vector2f(player->cx * 16 , player->cy * 16  ) + offset;
 	Vector2f displacement;
 	if (isLevelEditorOn)
@@ -190,7 +193,7 @@ void Game::updateView(View* view, double const dt)
 	else
 	{
 		displacement = Vector2f(Vector2f(goal.x * dt, goal.y * dt) - Vector2f(origin.x * dt, origin.y * dt));
-		displacement = Vector2f(displacement.x * 6, displacement.y * 1.5f);
+		displacement = Vector2f(displacement.x * 6, displacement.y * 3.0f);
 	}
 
 	view->move(displacement);
@@ -258,17 +261,25 @@ void Game::shoot()
 	canPlayerShoot = false;
 	player->isKnockback = true;
 	Vector2i direction(player->facesLeft ? -1 : 1, 0);
-	entities.emplace_back(new Projectile({(float) entities[0]->cx + (player->facesLeft ? -2 : 2), (float) entities[0]->cy + 0.5f }, {C::GRID_SIZE, C::GRID_SIZE}, direction));
+	entities.emplace_back(new Projectile(
+		{(float) entities[0]->cx + (player->facesLeft ? -2 : 2),
+			(float) entities[0]->cy + 0.5f }, 
+		{C::GRID_SIZE, C::GRID_SIZE},
+		direction)
+	);
 }
 
-void Game::petShoot()
+void Game::petShoot(Entity* target)
 {
 	if (!canPetShoot) return;
 	/*std::vector<Entity*> enemies = */
 	lastPetShortDeltaTime = 0.0f;
-	Vector2i directionToEnemy(1, 1);
 	entities.emplace_back(
-		new Projectile({(float) pet->cx, (float) pet->cy }, {C::GRID_SIZE, C::GRID_SIZE}, directionToEnemy));
+		new Projectile(
+			{(float) pet->cx, (float) pet->cy }, 
+			{C::GRID_SIZE, C::GRID_SIZE}, 
+			{target->cx - pet->cx, target->cy - pet->cy}
+		));
 }
 
 void Game::death_ray()
@@ -340,6 +351,7 @@ std::vector<Vector2i> Game::bresenham(Vector2i origin, Vector2i goal)
 
 void Game::screenshake()
 {
+	if (!allowScreenshake) return;
 	if (isScreenshaking) return;
 	isScreenshaking = true;
 	screenshotStartTime = g_time;
@@ -463,6 +475,8 @@ void Game::imGui(RenderWindow& win)
 		levelEditorMode = (EditorMode) levelEditorModeInt;
 	}
 
+	ImGui::Checkbox("Allow Screenshake", &allowScreenshake);
+
 	if (ImGui::Button("Save level"))
 	{
 		save();
@@ -537,4 +551,6 @@ void Game::respawn()
 {
 	player->cx = respawnPoint.x;
 	player->cy = respawnPoint.y;
+	pet->cx = respawnPoint.x - petOffset.x;
+	pet->cy = respawnPoint.y - petOffset.y;
 }

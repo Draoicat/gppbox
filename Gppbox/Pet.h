@@ -11,5 +11,10 @@ public:
 
     void go_up();
     void go_down();
+
+    static constexpr float SHOOT_RATE_PER_SECONDS{2.0f};
+    static constexpr float ENEMY_RANGE{8.0f};
+
+	Entity* scan_for_enemies();
 };
 

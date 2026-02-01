@@ -47,7 +47,7 @@ public:
 	bool canPlayerShoot{ true };
 	double lastShotDeltaTime{ 0.0f };
 
-	double petShootRatePerSeconds{2};
+	double petShootRatePerSeconds{0.5f};
 	bool canPetShoot{true};
 	double lastPetShortDeltaTime{ 0.0f };
 
@@ -68,6 +68,7 @@ public:
 	void update(double dt);
 	void updateView(View* view, double const dt); //kinda like a late update? to update the cam after the player moves.
 
+	bool allowScreenshake{ true };
 	bool isScreenshaking{ false };
 	double screenshotStartTime;
 	float const SCREENSHAKE_TIME_SECONDS{ 0.1f };
@@ -90,7 +91,7 @@ public:
 	// gardons le calcul initial, et trouvons l'offset pour réaligner le level editor avec la position de la souris dans l'écran
 	// (comme si l'écran collait toujours avec la grille des positions, mais on la décale après)
 	// donc j'ai mit des valeurs dans imgui et j'ai tweaké petit à petit jusqu'à trouver ces magnifiques nombres magiques.
-	Vector2i const PLAYER_POS_OFFSET_WITH_INITIAL_CAMERA{32, 47};
+	Vector2i const PLAYER_POS_OFFSET_WITH_INITIAL_CAMERA{32, 38};
 
 	void loadPlayer(float const x, float const y);
 	void loadPet(float const x, float const y);
@@ -107,7 +108,7 @@ public:
 
 	//actions
 	void shoot();
-	void petShoot();
+	void petShoot(Entity* target);
 	void death_ray();
 	static std::vector<Vector2i> bresenham(Vector2i origin, Vector2i goal);
 	double const DEATH_RAY_TIME_ON_SCREEN_SECONDS{ 0.2 };
